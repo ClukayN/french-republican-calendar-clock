@@ -96,9 +96,13 @@ Windows 桌面上的法国共和历日历时钟。单文件 exe，绿色免安�
 src/www/      index.html  styles.css  app.js  calendar.js  data.js
 src/app/      Program.cs  MainForm.cs  app.manifest
 tools/        build_data.py（生成 data.js）  make_icon.py（生成 app.ico）
+assets/       app.ico（构建输入：窗口图标与 exe 图标）
 build.ps1     编译脚本
 vendor/       WebView2 1.0.4314.35 的 DLL
+.github/      workflows/release.yml（打 tag 自动编译并上传 Release 附件）
 ```
+
+`build/`（中间产物）与 `dist/`（成品）都由 `build.ps1` 生成，已列入 `.gitignore`，不入库；成品请从 [Releases](https://github.com/ClukayN/french-republican-calendar-clock/releases) 下载。
 
 ## 重新构建
 
@@ -108,6 +112,10 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -Run     # 编译并启动
 ```
 
 需要：Windows + .NET Framework 4.8（系统自带）+ WebView2 运行时。
+
+### 自动发布
+
+推送形如 `v1.0.1` 的 tag 会触发 GitHub Actions：在 windows-latest 上编译，创建（或更新）同名 Release 并上传 `french-republican-calendar-clock-<tag>.exe`。手写过的 Release 说明不会被覆盖，只更新附件。
 
 ## 数据与文献
 

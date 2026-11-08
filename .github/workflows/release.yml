@@ -1,0 +1,63 @@
+name: Build and publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: 编译并发布
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v4
+
+      - name: 用 csc.exe 编译
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./build.ps1
+          Get-ChildItem dist | Format-Table Name, Length
+
+      - name: 生成发布用的 ASCII 文件名
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $tag = $env:GITHUB_REF_NAME
+          } else {
+            $tag = 'dev-' + $env:GITHUB_SHA.Substring(0, 7)
+          }
+          $asset = "french-republican-calendar-clock-$tag.exe"
+          Copy-Item 'dist\法国共和历.exe' "build\$asset"
+          "ASSET=$asset" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TAG=$tag"     | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: 创建或更新 Release 并上传附件
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = $env:TAG
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title $tag --generate-notes --latest
+          }
+          gh release upload $tag "build\$env:ASSET" --clobber
+          gh release view $tag --json name,assets
+
+      - name: 手动触发时留档
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: french-republican-calendar-clock-${{ github.sha }}
+          path: build/*.exe
+          retention-days: 14

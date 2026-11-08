@@ -16,6 +16,7 @@ $app  = Join-Path $root 'src\app'
 $web  = Join-Path $root 'vendor\webview2'
 $dist = Join-Path $root 'dist'
 $bld  = Join-Path $root 'build'
+$assets = Join-Path $root 'assets'
 
 $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if (-not (Test-Path $csc)) { throw "找不到 csc.exe：$csc" }
@@ -23,7 +24,7 @@ if (-not (Test-Path $csc)) { throw "找不到 csc.exe：$csc" }
 $core = Join-Path $web 'Microsoft.Web.WebView2.Core.dll'
 $wf   = Join-Path $web 'Microsoft.Web.WebView2.WinForms.dll'
 $ldr  = Join-Path $web 'WebView2Loader.dll'
-$ico  = Join-Path $bld 'app.ico'
+$ico  = Join-Path $assets 'app.ico'
 foreach ($f in @($core, $wf, $ldr, $ico)) {
   if (-not (Test-Path $f)) { throw "缺少依赖文件：$f" }
 }
