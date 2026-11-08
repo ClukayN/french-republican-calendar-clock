@@ -1,0 +1,16 @@
+# 编译中间产物
+build/RepublicanCalendar.exe
+build/tmp*/
+build/*.py
+
+# 临时目录
+tmp/
+tmp_*/
+*.log
+
+# 编辑器 / 系统
+.vs/
+.vscode/
+Thumbs.db
+desktop.ini
+.DS_Store
