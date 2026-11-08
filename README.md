@@ -8,7 +8,7 @@ Windows 桌面上的法国共和历日历时钟。单文件 exe，绿色免安�
 
 ## 直接使用
 
-双击 `dist\法国共和历.exe` 即可。
+通过Release下载运行即可。
 
 - 首次启动需要系统里装有 **Microsoft Edge WebView2 运行时**（Windows 10/11 一般自带）。
   若缺失，程序会给出提示和下载链接：<https://go.microsoft.com/fwlink/p/?LinkId=2124703>
