@@ -2,6 +2,8 @@
 
 Windows 桌面上的法国共和历日历时钟。单文件 exe，绿色免安装。
 
+> A desktop clock for the French Republican calendar on Windows: decimal time (10 hours a day), a dual-track dial, 30-day months, the day-of-year produce list, and both leap-year rules to compare. Single-file exe, UI in vanilla HTML/CSS/JS.
+
 ![界面](docs/preview.png)
 
 ## 直接使用
@@ -44,6 +46,20 @@ Windows 桌面上的法国共和历日历时钟。单文件 exe，绿色免安�
 - 时钟基准：本地时间 / 巴黎平太阳时。
 - 外观：随系统 / 羊皮纸 / 墨夜。
 - 制式：十进时 + 24 时，或仅十进时。
+
+## 界面截图
+
+**年份跳转面板**（可按共和纪年或公元年月跳转）
+
+![年份跳转](docs/year-nav.jpg)
+
+**日期换算**（结果直接跟上当日物产）
+
+![日期换算](docs/converter-item.jpg)
+
+**24 时制收起态**（虚线框的「24 时」，再点一下展开）
+
+![24 时 chip](docs/chip-24h.jpg)
 
 ## 两种置闰规则
 
@@ -104,3 +120,9 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -Run     # 编译并启动
 - 共和历只存在于 1792–1805 的史实区间，之后为推算（proleptic）；早于 1792-09-22 的日期显示为「共和国前」。
 - 巴黎平太阳时按固定的 UTC+9m21s 偏移换算，不含均时差（equation of time）。
 - 秋分精确法用 Meeus 近似公式求秋分时刻，巴黎时刻精度约 ±1 分钟，足以定性但非天文台级。
+
+## 许可证
+
+MIT License，见 [LICENSE](LICENSE)。
+
+数据部分（月名、日名、物产名称与农事说明）整理自维基百科，原内容遵循 CC BY-SA；程序代码遵循上述 MIT。

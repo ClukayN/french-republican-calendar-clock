@@ -120,3 +120,9 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -Run     # 编译并启动
 - 共和历只存在于 1792–1805 的史实区间，之后为推算（proleptic）；早于 1792-09-22 的日期显示为「共和国前」。
 - 巴黎平太阳时按固定的 UTC+9m21s 偏移换算，不含均时差（equation of time）。
 - 秋分精确法用 Meeus 近似公式求秋分时刻，巴黎时刻精度约 ±1 分钟，足以定性但非天文台级。
+
+## 许可证
+
+MIT License，见 [LICENSE](LICENSE)。
+
+数据部分（月名、日名、物产名称与农事说明）整理自维基百科，原内容遵循 CC BY-SA；程序代码遵循上述 MIT。
