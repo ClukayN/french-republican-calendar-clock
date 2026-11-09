@@ -13,3 +13,13 @@ tmp_*/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Android：工具链、构建产物、签名
+android/toolchain/
+android/build/
+android/dist/
+android/.gradle/
+*.apk
+*.aab
+*.keystore
+*.jks

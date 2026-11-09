@@ -1,8 +1,8 @@
 # 法国共和历 · Calendrier républicain
 
-Windows 桌面上的法国共和历日历时钟。单文件 exe，绿色免安装。
+Windows 桌面与 Android 上的法国共和历日历时钟。桌面版是单文件 exe，绿色免安装；安卓版是单 APK。
 
-> A desktop clock for the French Republican calendar on Windows: decimal time (10 hours a day), a dual-track dial, 30-day months, the day-of-year produce list, and both leap-year rules to compare. Single-file exe, UI in vanilla HTML/CSS/JS.
+> A clock and calendar for the French Republican calendar, on Windows and Android: decimal time (10 hours a day), a dual-track dial, 30-day months, the day-of-year produce list, and both leap-year rules to compare. UI in vanilla HTML/CSS/JS; the Windows build is a single-file exe, the Android build a single APK.
 
 ![界面](docs/preview.png)
 
@@ -61,6 +61,26 @@ Windows 桌面上的法国共和历日历时钟。单文件 exe，绿色免安�
 
 ![24 时 chip](docs/chip-24h.jpg)
 
+## Android 版
+
+同一套历法内核（`calendar.js` + `data.js`），界面按手机竖屏重排为四页，底部胶囊 tab 切换，也可以左右滑动翻页。
+
+| 钟 | 日历 | 换算 | 设置 |
+|---|---|---|---|
+| ![钟](docs/android-clock.jpg) | ![日历](docs/android-calendar.jpg) | ![换算](docs/android-convert.jpg) | ![设置](docs/android-dark.jpg) |
+
+- **横滑翻页**：任意页面左右滑动即可切页，阈值约屏宽 18%，边界处有阻尼回弹。
+- **钟**：与桌面同款双轨表盘，向下滚动可看到今日条（月名 / 日号 / 年号 / 公历）。
+- **日历**：日期牌 + 三旬网格（每旬 2 行 × 5 格，中文日名完整显示）+ 物产卡；点年号弹出底部面板，可按共和纪年或公元年月跳转。
+- **换算**：双向即时换算，结果内联物产，底部「在月历中查看这一天」直接跳到对应月份。
+- **设置**：置闰规则、时钟基准、外观（随系统 / 羊皮纸 / 墨夜）、制式。
+- 系统返回键：先关弹层，再回到第一页，最后才退出。
+- 全面屏适配：内容延伸到状态栏与导航栏下方，图标明暗随主题切换；竖屏锁定。
+
+安装：把 `android\dist\法国共和历.apk` 传到手机安装（需允许「安装未知来源应用」）。要求 Android 7.0（API 24）以上。
+
+![年份跳转](docs/android-sheet.jpg)
+
 ## 两种置闰规则
 
 | | 定长规则法（默认） | 巴黎秋分精确法 |
@@ -93,11 +113,14 @@ Windows 桌面上的法国共和历日历时钟。单文件 exe，绿色免安�
 - 源码：
 
 ```
-src/www/      index.html  styles.css  app.js  calendar.js  data.js
-src/app/      Program.cs  MainForm.cs  app.manifest
-tools/        build_data.py（生成 data.js）  make_icon.py（生成 app.ico）
-assets/       app.ico（构建输入：窗口图标与 exe 图标）
-build.ps1     编译脚本
+src/www/         index.html  styles.css  app.js  calendar.js  data.js
+src/www-mobile/  index.html  mobile.css  mobile.js   （复用同一个 calendar.js / data.js）
+src/app/         Program.cs  MainForm.cs  app.manifest
+android/src/     AndroidManifest.xml  res/  java/.../MainActivity.java
+android/         build_apk.ps1  tools/（add_dex.py、make_android_icon.py）
+tools/           build_data.py（生成 data.js）  make_icon.py（生成 app.ico）  shot_*.js（截图核对）
+assets/          app.ico（构建输入：窗口图标与 exe 图标）
+build.ps1        桌面版编译脚本
 vendor/       WebView2 1.0.4314.35 的 DLL
 .github/      workflows/release.yml（打 tag 自动编译并上传 Release 附件）
 ```
@@ -112,6 +135,14 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -Run     # 编译并启动
 ```
 
 需要：Windows + .NET Framework 4.8（系统自带）+ WebView2 运行时。
+
+### 构建 Android 版
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\android\build_apk.ps1   # 产物 android\dist\法国共和历.apk
+```
+
+需要 JDK 17 与 Android SDK（platform 34 + build-tools 34.0.0）。脚本里把 SDK 路径指向 `android/toolchain/sdk`（本地自备，不入库）。构建链是 aapt2 → javac → d8 → 塞 dex → zipalign → apksigner，不依赖 Gradle；签名用 `android/build/release.keystore`（本地生成，不入库）。
 
 ### 自动发布
 
@@ -128,6 +159,7 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -Run     # 编译并启动
 - 共和历只存在于 1792–1805 的史实区间，之后为推算（proleptic）；早于 1792-09-22 的日期显示为「共和国前」。
 - 巴黎平太阳时按固定的 UTC+9m21s 偏移换算，不含均时差（equation of time）。
 - 秋分精确法用 Meeus 近似公式求秋分时刻，巴黎时刻精度约 ±1 分钟，足以定性但非天文台级。
+- 安卓版只在模拟器（Pixel 5 / Android 14 API 34）上验证过，未上架 Google Play，APK 走侧载。
 
 ## 许可证
 

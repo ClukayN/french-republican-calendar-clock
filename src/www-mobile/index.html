@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#efe4cd" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>法国共和历</title>
+<link rel="stylesheet" href="mobile.css" />
+</head>
+<body>
+
+<!-- ══ 页面容器 ══════════════════════════════════════════ -->
+<div class="app">
+  <div class="pager" id="pager">
+
+    <!-- ── 第 1 页：钟 ─────────────────────────────────── -->
+    <section class="page" id="pgClock">
+      <div class="page-body">
+
+        <header class="ph">
+          <div class="ph-seal" aria-hidden="true">
+            <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18.5" /><path d="M20 6v28M8.6 12.6l22.8 14.8M31.4 12.6L8.6 27.4" /><circle cx="20" cy="20" r="4.6" class="solid" /></svg>
+          </div>
+          <div class="ph-text">
+            <h1>法国共和历</h1>
+            <p>Calendrier républicain</p>
+          </div>
+          <span class="rule-badge" id="ruleBadge">定长规则 · 罗姆</span>
+        </header>
+
+        <div class="dial-wrap">
+          <div class="dial-host" id="dialHost"></div>
+        </div>
+
+        <div class="digits">
+          <div class="dec" id="decClock" aria-live="off">
+            <span id="dh">00</span><i>:</i><span id="dm">00</span><i>:</i><span class="small" id="ds">00</span>
+          </div>
+          <div class="dec-side">
+            <span class="lbl">十进时<em>heure décimale</em></span>
+            <button class="chip24" id="btn24" type="button">
+              <span id="stdClock">--:--:--</span><i>24h</i>
+            </button>
+          </div>
+        </div>
+
+        <p class="scale-note" id="scaleNote">1日=10共和时=1000共和分=100000共和秒，1共和秒≈0.864秒</p>
+
+        <div class="today-strip" id="todayStrip">
+          <span class="ts-month" id="tsMonth">雾月</span>
+          <span class="ts-day" id="tsDay">18</span>
+          <span class="ts-year" id="tsYear">AN CCXXXV</span>
+          <span class="ts-greg" id="tsGreg">2026 年 11 月 8 日 · 星期日</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── 第 2 页：日历 ───────────────────────────────── -->
+    <section class="page" id="pgCal">
+      <div class="page-body">
+
+        <div class="month-head">
+          <button class="nav-btn" id="btnPrevYear" type="button" aria-label="上一年">«</button>
+          <button class="nav-btn" id="btnPrevMonth" type="button" aria-label="上个月">‹</button>
+          <button class="month-title" id="btnYearPick" type="button">
+            <span class="mt-cn" id="mtCn">雾月</span>
+            <span class="mt-fr" id="mtFr">BRUMAIRE</span>
+            <span class="mt-year" id="mtYear">AN CCXXXV</span>
+            <span class="mt-caret" aria-hidden="true"></span>
+          </button>
+          <button class="nav-btn" id="btnNextMonth" type="button" aria-label="下个月">›</button>
+          <button class="nav-btn" id="btnNextYear" type="button" aria-label="下一年">»</button>
+        </div>
+
+        <div class="plate">
+          <div class="plate-top">
+            <span class="plate-doy" id="plateDoy">第 18 日</span>
+            <span class="plate-decade" id="plateDecade">第二旬 · Octidi</span>
+          </div>
+          <h2 class="plate-month" id="plateMonth">Brumaire</h2>
+          <div class="plate-row">
+            <span class="plate-cn" id="plateMonthCn">雾月</span>
+            <span class="plate-an" id="plateYear">AN CCXXXV</span>
+          </div>
+          <div class="plate-year-cn" id="plateYearCn">共和二百三十五年</div>
+          <div class="plate-greg" id="plateGreg">2026 年 11 月 8 日 · 星期日</div>
+          <div class="plate-note" id="plateNote">秋 · 葡萄收获与酿酒之月</div>
+        </div>
+
+        <div class="decades" id="decades"></div>
+
+        <div class="card ded">
+          <div class="card-head">
+            <span class="chips"><i class="chip" id="dediCat">植物</i><i class="chip ghost" id="dediMode">今日物产</i></span>
+            <span class="card-fr" id="dediFr">Dentelaire</span>
+          </div>
+          <div class="dedi-cn" id="dediCn">白花丹</div>
+          <p class="dedi-desc" id="dediDesc">……</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── 第 3 页：换算 ───────────────────────────────── -->
+    <section class="page" id="pgConv">
+      <div class="page-body">
+
+        <h2 class="ph2">日期换算 <em>Conversion</em></h2>
+
+        <div class="card conv">
+          <label class="conv-tag">公历 → 共和历</label>
+          <div class="conv-inputs">
+            <input id="inGY" type="number" inputmode="numeric" min="1583" max="3999" value="2026" />
+            <select id="inGM" aria-label="公历月"></select>
+            <input id="inGD" type="number" inputmode="numeric" min="1" max="31" value="8" />
+          </div>
+          <output class="conv-out" id="outRep">—</output>
+        </div>
+
+        <div class="card conv">
+          <label class="conv-tag">共和历 → 公历</label>
+          <div class="conv-inputs">
+            <input id="inRY" type="number" inputmode="numeric" min="-500" max="9999" value="235" />
+            <select id="inRM" aria-label="共和月"></select>
+            <select id="inRD" aria-label="共和日"></select>
+          </div>
+          <output class="conv-out" id="outGreg">—</output>
+        </div>
+
+        <div class="card yearbar">
+          <div class="yb-head">
+            <span class="yb-title">年进度 <em>Année républicaine</em></span>
+            <span class="yb-count" id="ybCount">第 48 / 365 日</span>
+          </div>
+          <div class="yb-track"><i class="yb-fill" id="ybFill"></i><b class="yb-mark" id="ybMark"></b></div>
+          <div class="yb-foot"><span id="ybStart">2026 年 9 月 22 日</span><span id="ybEnd">2027 年 9 月 21 日</span></div>
+        </div>
+
+        <p class="hint">两个方向都按当前置闰规则计算，切换规则后立即重算。</p>
+
+        <button class="go-cal" id="btnGoCal" type="button">
+          <span>在月历中查看这一天</span>
+          <svg viewBox="0 0 24 24"><path d="M5 12h13M12.6 5.6 19 12l-6.4 6.4"/></svg>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- ── 第 4 页：设置 ───────────────────────────────── -->
+    <section class="page" id="pgSet">
+      <div class="page-body">
+
+        <h2 class="ph2">设置 <em>Réglages</em></h2>
+
+        <div class="field">
+          <label class="field-label">置闰规则 <em>Intercalation</em></label>
+          <div class="radio-cards" id="ruleCards">
+            <label class="rc">
+              <input type="radio" name="rule" value="romme" checked />
+              <span class="rc-title">定长规则法 · 罗姆</span>
+              <span class="rc-desc">自共和四年起每四年一闰，百年为平、四百年复闰。</span>
+            </label>
+            <label class="rc">
+              <input type="radio" name="rule" value="equinox" />
+              <span class="rc-title">巴黎秋分精确法</span>
+              <span class="rc-desc">以巴黎子午线上秋分真实时刻所在日为岁首。</span>
+            </label>
+          </div>
+          <p class="field-note">两法在 2026 年相差一日：罗姆法 18 Brumaire，秋分法 17 Brumaire。</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">时钟基准 <em>Référence</em></label>
+          <div class="seg" id="tzSeg">
+            <button type="button" data-v="local" class="on">本地时间</button>
+            <button type="button" data-v="paris">巴黎平太阳时</button>
+          </div>
+          <p class="field-note" id="tzNote">以本机当地零时为共和历 0 时。</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">外观 <em>Apparence</em></label>
+          <div class="seg" id="themeSeg">
+            <button type="button" data-v="auto" class="on">随系统</button>
+            <button type="button" data-v="light">羊皮纸</button>
+            <button type="button" data-v="dark">墨夜</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">制式 <em>Format</em></label>
+          <div class="seg" id="fmtSeg">
+            <button type="button" data-v="both" class="on">十进时 + 24 时</button>
+            <button type="button" data-v="dec">仅十进时</button>
+          </div>
+        </div>
+
+        <div class="about">
+          <p>纪元：1792 年 9 月 22 日（1 Vendémiaire an I）。月名与日名依 1793 年 10 月 5 日法令；中文名依中文维基百科。</p>
+          <p class="small">校验点：9 Thermidor an II = 1794-07-27；18 Brumaire an VIII = 1799-11-09；1 Vendémiaire an XIV = 1805-09-23。</p>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── 底栏 ───────────────────────────────────────────── -->
+  <nav class="tabbar" id="tabbar">
+    <button class="tab on" type="button" data-i="0">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3.4 2.2"/></svg>
+      <span>钟</span>
+    </button>
+    <button class="tab" type="button" data-i="1">
+      <svg viewBox="0 0 24 24"><rect x="3.6" y="5" width="16.8" height="15" rx="2.4"/><path d="M3.6 9.4h16.8M8.6 3.6v2.8M15.4 3.6v2.8"/><circle cx="8" cy="13.4" r="1"/><circle cx="12" cy="13.4" r="1"/><circle cx="16" cy="13.4" r="1"/><circle cx="8" cy="17" r="1"/><circle cx="12" cy="17" r="1"/><circle cx="16" cy="17" r="1"/></svg>
+      <span>日历</span>
+    </button>
+    <button class="tab" type="button" data-i="2">
+      <svg viewBox="0 0 24 24"><path d="M4 8h11.4M12.6 4.6 16 8l-3.4 3.4"/><path d="M20 16H8.6M11.4 12.6 8 16l3.4 3.4"/></svg>
+      <span>换算</span>
+    </button>
+    <button class="tab" type="button" data-i="3">
+      <svg viewBox="0 0 24 24"><path d="M4 7.4h6.4M14.8 7.4h5.2M4 16.6h5.2M13.6 16.6H20"/><circle cx="12.6" cy="7.4" r="2.2"/><circle cx="11.4" cy="16.6" r="2.2"/></svg>
+      <span>设置</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ══ 年份跳转（底部弹层） ══════════════════════════════ -->
+<div class="sheet-scrim" id="sheetScrim" hidden></div>
+<div class="sheet" id="yearSheet" hidden>
+  <div class="sheet-grab" aria-hidden="true"><i></i></div>
+
+  <div class="yp-tabs" id="yearMode">
+    <button type="button" data-v="rep" class="on">共和纪年</button>
+    <button type="button" data-v="greg">公元</button>
+  </div>
+
+  <div class="yp-row" id="repRow">
+    <input class="yp-in" id="yearIn" type="number" min="-9999" max="9999" step="1" inputmode="numeric" autocomplete="off" aria-label="共和年号" />
+    <span class="yp-unit">年</span>
+    <select class="yp-sel" id="monthInRep" aria-label="共和历月份"></select>
+  </div>
+
+  <div class="yp-row" id="gregRow" hidden>
+    <input class="yp-in" id="gregYearIn" type="number" min="1" max="9999" step="1" inputmode="numeric" autocomplete="off" aria-label="公元年份" />
+    <span class="yp-unit">年</span>
+    <select class="yp-sel" id="gregMonthIn" aria-label="公历月份"></select>
+  </div>
+
+  <div class="yp-preview" id="yearPreview">→ 雾月 AN CCXXXV</div>
+
+  <div class="yp-quick" id="yearQuick">
+    <button type="button" data-d="-100">−100</button>
+    <button type="button" data-d="-10">−10</button>
+    <button type="button" data-d="-1">−1</button>
+    <button type="button" data-d="1">+1</button>
+    <button type="button" data-d="10">+10</button>
+    <button type="button" data-d="100">+100</button>
+  </div>
+
+  <div class="yp-foot">
+    <span class="yp-note">负数表示共和纪年前</span>
+    <button class="yp-go" id="yearGo" type="button">跳转</button>
+  </div>
+</div>
+
+<script src="calendar.js"></script>
+<script src="data.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>
