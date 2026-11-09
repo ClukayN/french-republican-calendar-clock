@@ -168,18 +168,24 @@ if (-not (Test-Path $ks)) {
     '-dname', 'CN=French Republican Calendar, O=ClukayN, C=CN')
   Invoke-Native 'keytool' $ktArgs 'keytool' | Out-Null
 }
+# apksigner 是 JVM 程序，在非中文系统的 runner 上 sun.jnu.encoding 不是 UTF-8，
+# 直接把中文输出路径交给它会报 java.io.IOException: Bad pathname —— 先签成 ASCII 名再改名。
 $final = Join-Path $outDir '法国共和历.apk'
-if (Test-Path $final) { Remove-Item $final -Force }
+$signedTmp = Join-Path $bld 'app-signed.apk'
+if (Test-Path $signedTmp) { Remove-Item $signedTmp -Force }
 $signArgs = @('-jar', $apksigner, 'sign',
   '--ks', $ks,
   '--ks-key-alias', $ksAlias,
   '--ks-pass', "pass:$ksPass",
   '--key-pass', "pass:$ksPass",
-  '--out', $final, $aligned)
+  '--out', $signedTmp, $aligned)
 Invoke-Native 'java' $signArgs 'apksigner' | Out-Null
 
 Step '校验签名 ...'
-Invoke-Native 'java' @('-jar', $apksigner, 'verify', '--print-certs', $final) 'apksigner verify' | ForEach-Object { if (-not $Quiet) { Write-Host $_ } }
+Invoke-Native 'java' @('-jar', $apksigner, 'verify', '--print-certs', $signedTmp) 'apksigner verify' | ForEach-Object { if (-not $Quiet) { Write-Host $_ } }
+
+if (Test-Path $final) { Remove-Item $final -Force }
+Move-Item $signedTmp $final -Force
 
 $size = (Get-Item $final).Length
 $hash = (Get-FileHash $final -Algorithm SHA256).Hash.Substring(0, 16)
