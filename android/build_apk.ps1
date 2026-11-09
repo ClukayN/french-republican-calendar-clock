@@ -109,13 +109,23 @@ $resZip = Join-Path $bld 'res.zip'
 if (Test-Path $resZip) { Remove-Item $resZip -Force }
 Invoke-Native $aapt2 @('compile', '--dir', (Join-Path $src 'res'), '-o', $resZip) 'aapt2 compile' | Out-Null
 
+Step '写入版本号 ...'
+# aapt2 link 的 --version-code/--version-name 会被清单里已有的值盖住，
+# 所以先按 -VersionName / -VersionCode 生成一份清单副本再交给 aapt2。
+$manifestSrc = Join-Path $src 'AndroidManifest.xml'
+$manifestOut = Join-Path $bld 'AndroidManifest.xml'
+$xmlText = [IO.File]::ReadAllText($manifestSrc, [System.Text.Encoding]::UTF8)
+$xmlText = [regex]::Replace($xmlText, 'android:versionCode="[^"]*"', ('android:versionCode="' + $VersionCode + '"'))
+$xmlText = [regex]::Replace($xmlText, 'android:versionName="[^"]*"', ('android:versionName="' + $VersionName + '"'))
+[IO.File]::WriteAllText($manifestOut, $xmlText, (New-Object System.Text.UTF8Encoding $false))
+
 Step '链接资源 (aapt2 link) ...'
 $unapk = Join-Path $bld 'app-unsigned.apk'
 if (Test-Path $unapk) { Remove-Item $unapk -Force }
 $linkArgs = @(
   'link', '-o', $unapk,
   '-I', $androidJar,
-  '--manifest', (Join-Path $src 'AndroidManifest.xml'),
+  '--manifest', $manifestOut,
   '-R', $resZip,
   '--java', $genDir,
   '-A', (Join-Path $bld 'assets'),

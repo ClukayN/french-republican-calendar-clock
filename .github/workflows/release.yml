@@ -22,7 +22,12 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          ./build.ps1
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $v = $env:GITHUB_REF_NAME.TrimStart('v')
+          } else {
+            $v = "0.0.$($env:GITHUB_RUN_NUMBER)"
+          }
+          ./build.ps1 -Version $v
           Get-ChildItem dist | Format-Table Name, Length
 
       - name: 生成发布用的 ASCII 文件名

@@ -5,7 +5,8 @@
 # =========================================================================
 param(
   [switch]$Run,
-  [switch]$Quiet
+  [switch]$Quiet,
+  [string]$Version = '1.1.0'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,9 +35,25 @@ New-Item -ItemType Directory -Force -Path $dist, $bld | Out-Null
 $exe = Join-Path $bld 'RepublicanCalendar.exe'
 if (Test-Path $exe) { Remove-Item $exe -Force }
 
+# 版本信息（exe 属性里的「产品版本」），由 -Version 写入
+$asmInfo = Join-Path $bld 'AssemblyInfo.cs'
+$asmText = @"
+using System.Reflection;
+[assembly: AssemblyTitle("法国共和历")]
+[assembly: AssemblyDescription("法国共和历日历时钟 · Calendrier républicain")]
+[assembly: AssemblyProduct("Calendrier républicain")]
+[assembly: AssemblyCompany("ClukayN")]
+[assembly: AssemblyCopyright("MIT License © 2026 ClukayN")]
+[assembly: AssemblyVersion("$Version")]
+[assembly: AssemblyFileVersion("$Version")]
+[assembly: AssemblyInformationalVersion("$Version")]
+"@
+[IO.File]::WriteAllText($asmInfo, $asmText, (New-Object System.Text.UTF8Encoding $true))
+
 $sources = @(
   (Join-Path $app 'Program.cs'),
-  (Join-Path $app 'MainForm.cs')
+  (Join-Path $app 'MainForm.cs'),
+  $asmInfo
 )
 
 $cscArgs = @(
