@@ -36,6 +36,7 @@ import java.io.InputStream;
 public class MainActivity extends Activity {
 
     private static final String HOST = "appassets.androidplatform.net";
+    private static final boolean DEBUG = false;
     private static final String BASE_URL = "https://" + HOST + "/";
 
     private WebView web;
@@ -70,15 +71,16 @@ public class MainActivity extends Activity {
         web.setHorizontalScrollBarEnabled(false);
         web.setWebViewClient(new AssetClient());
         web.addJavascriptInterface(new Bridge(), "AndroidHost");
-        web.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onConsoleMessage(ConsoleMessage m) {
-                Log.i("RCWEB", m.message() + " @" + m.sourceId() + ":" + m.lineNumber());
-                return true;
-            }
-        });
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
+        // 保留远端调试能力（adb forward 到 webview_devtools_remote 即可用 CDP 检查页面）
+        WebView.setWebContentsDebuggingEnabled(true);
+        if (DEBUG) {
+            web.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public boolean onConsoleMessage(ConsoleMessage m) {
+                    Log.i("RC", m.message() + " @" + m.sourceId() + ":" + m.lineNumber());
+                    return true;
+                }
+            });
         }
 
         // 让网页铺到状态栏/导航栏下面，避免纸纹与纯色之间出现接缝
@@ -106,8 +108,7 @@ public class MainActivity extends Activity {
                     new android.window.OnBackInvokedCallback() {
                         @Override
                         public void onBackInvoked() {
-                            Log.i("RCWEB", "onBackInvoked");
-                            handleBack();
+                                            handleBack();
                         }
                     });
         }
@@ -128,8 +129,7 @@ public class MainActivity extends Activity {
         web.evaluateJavascript(BACK_JS, new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String value) {
-                Log.i("RCWEB", "back js -> " + value);
-                if (!"true".equals(value)) {
+                    if (!"true".equals(value)) {
                     if (web.canGoBack()) web.goBack();
                     else finish();
                 }
@@ -139,7 +139,6 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        Log.i("RCWEB", "onBackPressed");
         handleBack();
     }
 
@@ -218,19 +217,18 @@ public class MainActivity extends Activity {
                 resp.setStatusCodeAndReasonPhrase(200, "OK");
                 return resp;
             } catch (IOException e) {
-                Log.e("RCWEB", "asset missing: " + path + " -> " + e);
+                Log.e("RC", "asset missing: " + path, e);
                 return null;
             }
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            Log.i("RCWEB", "page finished: " + url);
         }
 
         @Override
         public void onReceivedError(WebView view, WebResourceRequest req, android.webkit.WebResourceError err) {
-            Log.e("RCWEB", "error " + err.getErrorCode() + " " + req.getUrl());
+            Log.e("RC", "error " + err.getErrorCode() + " " + req.getUrl());
         }
 
         private String mimeOf(String path) {
