@@ -14,8 +14,8 @@ param(
   [switch]$Install,
   [switch]$Quiet,
   [string]$SdkRoot = '',
-  [string]$VersionName = '1.0.0',
-  [int]$VersionCode = 1
+  [string]$VersionName = '1.2.0',
+  [int]$VersionCode = 8
 )
 
 $ErrorActionPreference = 'Stop'
@@ -103,6 +103,7 @@ Copy-Item (Join-Path $wwwMobile 'mobile.css')  $assets -Force
 Copy-Item (Join-Path $wwwMobile 'mobile.js')   $assets -Force
 Copy-Item (Join-Path $wwwDesktop 'calendar.js') $assets -Force
 Copy-Item (Join-Path $wwwDesktop 'data.js')     $assets -Force
+Copy-Item (Join-Path $wwwDesktop 'i18n.js')     $assets -Force
 
 Step '编译资源 (aapt2 compile) ...'
 $resZip = Join-Path $bld 'res.zip'

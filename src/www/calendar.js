@@ -203,13 +203,19 @@
     if (!DATA) return null;
     if (month >= 13) {
       var s = DATA.sansculottides[Math.min(day, 6) - 1];
-      return s ? { fr: s.fr, cn: s.cn, cat: s.cat, desc: s.desc } : null;
+      return s ? {
+        fr: s.fr, cn: s.cn, cat: s.cat, desc: s.desc,
+        en: s.en, descEn: s.descEn, descFr: s.descFr
+      } : null;
     }
     var mi = monthInfo(month);
     if (!mi) return null;
     var dd = mi.days[day - 1];
     if (!dd) return null;
-    return { fr: dd.fr, cn: dd.cn, cat: dd.cat, desc: dd.desc };
+    return {
+      fr: dd.fr, cn: dd.cn, cat: dd.cat, desc: dd.desc,
+      en: dd.en, descEn: dd.descEn, descFr: dd.descFr
+    };
   }
 
   /* 共和历日名（中文 / 法文） */

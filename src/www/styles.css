@@ -311,18 +311,12 @@ html[data-theme="dark"] .icon-btn .i-moon { display: none; }
   border: 1px solid var(--line-soft);
   border-radius: 5px;
   padding: 2px 7px;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   transition: all .16s ease;
 }
-.mini-toggle:hover { border-color: var(--line); color: var(--ink); }
 .mini-toggle-tag { font-size: 9px; color: var(--ink-faint); letter-spacing: .08em; }
-.mini-toggle.off { border-style: dashed; border-color: var(--line-soft); color: var(--ink-faint); }
-.mini-toggle.off:hover { border-color: var(--red-soft); color: var(--ink-soft); }
-.mini-toggle.off #stdClock { letter-spacing: .02em; }
-.mini-toggle.off .mini-toggle-tag { display: none; }
 
 .scale-note {
   margin-top: 6px;
@@ -330,7 +324,17 @@ html[data-theme="dark"] .icon-btn .i-moon { display: none; }
   border-top: 1px solid var(--line-soft);
   font-size: 11.5px;
   letter-spacing: .02em;
+  line-height: 1.45;
   color: var(--ink-soft);
+}
+
+.nw { white-space: nowrap; }
+
+html[data-lang="en"] .scale-note,
+html[data-lang="fr"] .scale-note {
+  font-size: 10.5px;
+  letter-spacing: 0;
+  line-height: 1.42;
 }
 
 /* ── 右栏 ─────────────────────────────────────────────── */
@@ -1029,3 +1033,6 @@ html[data-theme="dark"] .seg button:hover { background: rgba(255, 240, 200, .06)
   background: var(--line); border-radius: 3px;
 }
 .side-panel::-webkit-scrollbar-track, .drawer-body::-webkit-scrollbar-track { background: transparent; }
+
+/* 法语第一旬用 1re，上标字母会被 uppercase 弄坏，这里不要转大写 */
+html[data-lang="fr"] .decade-label b { text-transform: none; }

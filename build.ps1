@@ -6,7 +6,7 @@
 param(
   [switch]$Run,
   [switch]$Quiet,
-  [string]$Version = '1.1.0'
+  [string]$Version = '1.2.0'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -70,6 +70,7 @@ $cscArgs = @(
   ('/reference:' + $wf),
   ('/resource:' + (Join-Path $www 'index.html') + ',www.index.html'),
   ('/resource:' + (Join-Path $www 'app.js') + ',www.app.js'),
+  ('/resource:' + (Join-Path $www 'i18n.js') + ',www.i18n.js'),
   ('/resource:' + (Join-Path $www 'calendar.js') + ',www.calendar.js'),
   ('/resource:' + (Join-Path $www 'styles.css') + ',www.styles.css'),
   ('/resource:' + (Join-Path $www 'data.js') + ',www.data.js'),

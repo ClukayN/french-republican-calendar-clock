@@ -15,14 +15,10 @@
 
   var WEEKDAYS = ['Primidi', 'Duodi', 'Tridi', 'Quartidi', 'Quintidi', 'Sextidi',
     'Septidi', 'Octidi', 'Nonidi', 'Décadi'];
-  var WEEKDAYS_CN = ['一日', '二日', '三日', '四日', '五日', '六日', '七日', '八日', '九日', '十日'];
-  var GREG_WEEK = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-  var CN_DIGIT = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-  var FR_MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet',
-    'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-
+  var I = window.I18N;
+  function t(k, v) { return I.t(k, v); }
   /* ── 设置 ─────────────────────────────────────────────── */
-  var DEFAULTS = { rule: 'romme', tz: 'local', theme: 'auto', fmt: 'both' };
+  var DEFAULTS = { rule: 'romme', tz: 'local', theme: 'auto', lang: 'auto' };
   var S = Object.assign({}, DEFAULTS);
   var STORE_KEY = 'rc.settings.v1';
 
@@ -36,6 +32,7 @@
         });
       }
     } catch (e) { /* 忽略 */ }
+    I.setSetting(S.lang);
   }
   function saveSettings() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { /* 忽略 */ }
@@ -44,28 +41,6 @@
   /* ── 工具 ─────────────────────────────────────────────── */
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  function cnNumber(n) {
-    if (!isFinite(n)) return String(n);
-    n = Math.trunc(n);
-    if (n === 0) return '〇';
-    if (n < 0) return '负' + cnNumber(-n);
-    if (n > 9999) {
-      return String(n).split('').map(function (c) { return CN_DIGIT[+c]; }).join('');
-    }
-    var units = ['', '十', '百', '千'];
-    var digits = String(n).split('').map(Number);
-    var out = '';
-    var zero = false;
-    for (var i = 0; i < digits.length; i++) {
-      var d = digits[i];
-      var u = units[digits.length - 1 - i];
-      if (d === 0) { zero = true; continue; }
-      if (zero && out) out += '〇';
-      zero = false;
-      out += (d === 1 && u === '十' && i === 0 ? '' : CN_DIGIT[d]) + u;
-    }
-    return out;
-  }
 
   var LOCAL_TZ = (function () {
     try { return Intl.DateTimeFormat().resolvedOptions().timeZone || '本地'; }
@@ -218,7 +193,7 @@
 
   /* ── DOM ──────────────────────────────────────────────── */
   var dom = {};
-  ['dh', 'dm', 'ds', 'stdClock', 'btn24', 'scaleNote', 'ruleBadge',
+  ['dh', 'dm', 'ds', 'stdClock', 'scaleNote', 'ruleBadge',
     'tsMonth', 'tsDay', 'tsYear', 'tsGreg',
     'mtCn', 'mtFr', 'mtYear', 'btnPrevYear', 'btnPrevMonth', 'btnNextMonth', 'btnNextYear',
     'btnYearPick', 'decades', 'plateDoy', 'plateDecade', 'plateMonth', 'plateMonthCn',
@@ -226,7 +201,7 @@
     'dediCat', 'dediMode', 'dediFr', 'dediCn', 'dediDesc',
     'inGY', 'inGM', 'inGD', 'outRep', 'inRY', 'inRM', 'inRD', 'outGreg',
     'ybCount', 'ybFill', 'ybMark', 'ybStart', 'ybEnd',
-    'tzSeg', 'themeSeg', 'fmtSeg', 'tzNote', 'ruleCards',
+    'tzSeg', 'themeSeg', 'tzNote', 'ruleCards',
     'yearSheet', 'sheetScrim', 'yearMode', 'repRow', 'yearIn', 'monthInRep',
     'gregRow', 'gregYearIn', 'gregMonthIn', 'yearPreview', 'yearQuick', 'yearGo',
     'tabbar', 'pager'].forEach(function (id) {
@@ -248,14 +223,10 @@
     setText(dom.dm, pad2(dt.m));
     setText(dom.ds, pad2(Math.floor(dt.s)));
 
-    if (S.fmt === 'dec') {
-      setText(dom.stdClock, '24 时');
-    } else {
-      var hh = Math.floor(parts.sec / 3600);
-      var mm = Math.floor((parts.sec % 3600) / 60);
-      var ss = Math.floor(parts.sec % 60);
-      setText(dom.stdClock, pad2(hh) + ':' + pad2(mm) + ':' + pad2(ss));
-    }
+    var hh = Math.floor(parts.sec / 3600);
+    var mm = Math.floor((parts.sec % 3600) / 60);
+    var ss = Math.floor(parts.sec % 60);
+    setText(dom.stdClock, pad2(hh) + ':' + pad2(mm) + ':' + pad2(ss));
 
     var a24 = (parts.sec / 86400) * 360;
     var aDecM = ((parts.sec / 86.4) % 100) * 3.6;
@@ -275,41 +246,46 @@
   /* ── 今日条 / 日期牌 ─────────────────────────────────── */
   function renderToday(parts, idx) {
     var r = repOf(idx);
-    var ml = monthLabel(r.month);
-    setText(dom.tsMonth, ml.cn);
-    setText(dom.tsDay, r.month >= 13 ? String(r.day) : String(r.day));
-    setText(dom.tsYear, 'AN ' + RC.roman(r.year));
-    setText(dom.tsGreg, parts.greg.y + ' 年 ' + parts.greg.m + ' 月 ' + parts.greg.d + ' 日 · ' +
-      GREG_WEEK[new Date(parts.greg.y, parts.greg.m - 1, parts.greg.d).getDay()]);
+    setText(dom.tsMonth, I.mode() === 'zh' ? monthLabel(r.month).cn : I.monthUpper(r.month));
+    setText(dom.tsDay, String(r.day));
+    setText(dom.tsYear, I.repYear(r.year));
+    setText(dom.tsGreg, I.gregDate(parts.greg.y, parts.greg.m, parts.greg.d, { weekday: true }));
   }
 
   function renderPlate(r, greg, idx) {
     var isComp = r.month >= 13;
-    var ml = monthLabel(r.month);
 
-    setText(dom.plateDoy, isComp ? ('第 ' + r.day + ' 补充日') : ('第 ' + r.day + ' 日'));
-    setText(dom.plateDecade, isComp ? '岁末 · Sansculottides'
-      : ('第' + cnNumber(Math.floor((r.day - 1) / 10) + 1) + '旬 · ' + WEEKDAYS[r.weekday]));
-    setText(dom.plateMonth, ml.fr);
-    setText(dom.plateMonthCn, ml.cn);
-    setText(dom.plateYear, 'AN ' + RC.roman(r.year));
-    setText(dom.plateYearCn, '共和' + cnNumber(r.year) + '年');
-    setText(dom.plateGreg, greg.y + ' 年 ' + greg.m + ' 月 ' + greg.d + ' 日 · ' + weekdayOf(greg));
-    setText(dom.plateNote, isComp ? '补充日 · 共和历的岁末节日'
-      : (DATA.months[r.month - 1].season + ' · ' + DATA.months[r.month - 1].note));
+    setText(dom.plateDoy, isComp ? t('plate.doyComp', { n: r.day }) : t('plate.doy', { n: r.day }));
+    setText(dom.plateDecade, isComp ? t('plate.decadeComp')
+      : (I.decade(Math.floor((r.day - 1) / 10) + 1) + ' · ' + I.weekdayOf((r.day - 1) % 10)));
+    setText(dom.plateMonth, I.monthUpper(r.month));
+    setText(dom.plateMonthCn, I.monthSecondary(r.month) || '');
+
+    var yl = I.repYear(r.year);
+    setText(dom.plateYear, yl);
+    var sub = I.repYearSub(r.year);
+    setText(dom.plateYearCn, I.mode() === 'fr' ? '' : sub);
+
+    setText(dom.plateGreg, I.gregDate(greg.y, greg.m, greg.d, { weekday: true }));
+    setText(dom.plateNote, isComp ? t('plate.noteComp')
+      : (I.season(DATA.months[r.month - 1].season) + ' · ' +
+        (I.mode() === 'fr' ? (DATA.months[r.month - 1].noteFr || DATA.months[r.month - 1].note)
+          : I.mode() === 'en' ? (DATA.months[r.month - 1].noteEn || DATA.months[r.month - 1].note)
+            : DATA.months[r.month - 1].note)));
 
     var info = r.info;
     if (info) {
-      setText(dom.dediCat, info.cat || '物产');
-      setText(dom.dediMode, r.month >= 13 ? '岁末节日' : '当日物产');
-      setText(dom.dediFr, info.fr);
-      setText(dom.dediCn, info.cn);
-      setText(dom.dediDesc, info.desc || '');
+      setText(dom.dediCat, I.cat(info.cat) || t('chip.cat'));
+      setText(dom.dediMode, r.month >= 13 ? t('chip.festival') : t('chip.today'));
+      setText(dom.dediFr, info.fr || '');
+      dom.dediFr.style.display = (I.mode() === 'fr' || !info.fr) ? 'none' : '';
+      setText(dom.dediCn, I.mode() === 'zh' ? (info.cn || '') : (info.en || info.cn || ''));
+      setText(dom.dediDesc, I.dayDesc(info) || '');
     }
   }
 
   function weekdayOf(greg) {
-    return GREG_WEEK[new Date(greg.y, greg.m - 1, greg.d).getDay()];
+    return I.gregWeekdayName(new Date(greg.y, greg.m - 1, greg.d).getDay());
   }
 
   /* ── 月历 ─────────────────────────────────────────────── */
@@ -317,29 +293,37 @@
     var y = view.year, m = view.month;
     var todayIdx = RC.dayFromGreg(nowParts().greg.y, nowParts().greg.m, nowParts().greg.d);
 
-    var label = monthLabel(m);
-    setText(dom.mtCn, label.cn);
-    setText(dom.mtFr, label.fr);
+    var isComp = m >= 13;
+    if (I.mode() === 'zh') {
+      setText(dom.mtCn, isComp ? t('plate.complementary') : DATA.months[m - 1].cn);
+      setText(dom.mtFr, isComp ? 'SANS-CULOTTIDES' : DATA.months[m - 1].fr.toUpperCase());
+      dom.mtFr.style.display = '';
+    } else {
+      setText(dom.mtCn, I.monthUpper(m));
+      var sec = isComp ? '' : (I.mode() === 'en' ? (DATA.months[m - 1].en || '') : '');
+      setText(dom.mtFr, sec ? sec.toUpperCase() : '');
+      dom.mtFr.style.display = sec ? '' : 'none';
+    }
     setText(dom.mtYear, repYearLabel(y));
 
     var base = RC.toDayIndex(y, m, 1, S.rule);
-    var isComp = m >= 13;
 
     var html = '';
     if (!isComp) {
       for (var dcd = 0; dcd < 3; dcd++) {
-        html += '<div class="decade"><div class="decade-label"><b>第' + cnNumber(dcd + 1) + '旬</b>DÉCADE ' + RC.roman(dcd + 1) + '</div>';
+        html += '<div class="decade"><div class="decade-label"><b>' + I.decade(dcd + 1) + '</b>' +
+          (I.mode() === 'zh' ? 'DÉCADE ' + RC.roman(dcd + 1) : '') + '</div>';
         for (var i = 0; i < 10; i++) {
           var dayNo = dcd * 10 + i + 1;
-          var didx = base + dayNo - 1;
-          html += dayCell(dayNo, didx, todayIdx, false);
+          html += dayCell(dayNo, base + dayNo - 1, todayIdx, false);
         }
         html += '</div>';
       }
     } else {
       var len = RC.yearLength(y, S.rule) - 360;
       html += '<div class="decade comp" style="grid-template-columns:30px repeat(' + Math.max(len, 1) + ',minmax(0,1fr))">' +
-        '<div class="decade-label"><b>岁末</b>SANS.</div>';
+        '<div class="decade-label"><b>' + t('decade.labelComp') + '</b>' +
+        (I.mode() === 'zh' ? 'SANS.' : '') + '</div>';
       for (var c = 1; c <= len; c++) {
         html += dayCell(c, base + c - 1, todayIdx, true);
       }
@@ -354,12 +338,13 @@
   function dayCell(dayNo, idx, todayIdx, isComp) {
     var r = RC.fromDayIndex(idx, S.rule);
     var info = RC.dayDedication(r.month, r.day);
-    var nm = info ? info.cn : '';
+    var nm = info ? I.dayName(info) : '';
     var cls = 'day' + (isComp ? ' comp' : '');
     if (idx === todayIdx) cls += ' today';
     if (selection !== null && idx === selection) cls += ' selected';
-    return '<button type="button" class="' + cls + '" data-i="' + idx + '" title="' + dayNo + ' ' +
-      (info ? info.fr : '') + '">' +
+    var title = String(dayNo) + (info ? ' ' + (info.fr || '') : '') +
+      (I.mode() === 'zh' && info ? ' · ' + (info.cn || '') : '');
+    return '<button type="button" class="' + cls + '" data-i="' + idx + '" title="' + title + '">' +
       '<span class="dn">' + dayNo + '</span>' +
       '<span class="dd">' + nm + '</span>' +
       '</button>';
@@ -373,7 +358,7 @@
 
   /* ── 年份 ─────────────────────────────────────────────── */
   function repYearLabel(y) {
-    return y > 0 ? ('AN ' + RC.roman(y)) : ('前' + cnNumber(1 - y) + '年');
+    return I.repYear(y);
   }
 
   function setView(y, m) {
@@ -413,12 +398,12 @@
         var mi = DATA.months[i - 1];
         var o = document.createElement('option');
         o.value = String(i);
-        o.textContent = mi.cn + ' · ' + mi.fr;
+        o.textContent = I.repMonthLabel(i);
         f.appendChild(o);
       }
       var o13 = document.createElement('option');
       o13.value = '13';
-      o13.textContent = '补充日 · Sansculottides';
+      o13.textContent = I.repMonthLabel(13);
       f.appendChild(o13);
       dom.monthInRep.appendChild(f);
     }
@@ -427,7 +412,7 @@
       for (var j = 1; j <= 12; j++) {
         var og = document.createElement('option');
         og.value = String(j);
-        og.textContent = j + ' 月 · ' + FR_MONTHS[j - 1];
+        og.textContent = I.gregMonthLabel(j);
         g.appendChild(og);
       }
       dom.gregMonthIn.appendChild(g);
@@ -465,7 +450,7 @@
       var r = repMonthOfGregYear(gy, gm);
       out = { year: r.year, month: r.month, gregText: gy + '-' + pad2(gm) };
     }
-    out.label = out.gregText + ' → ' + monthLabel(out.month).cn + ' ' + repYearLabel(out.year);
+    out.label = out.gregText + ' → ' + I.monthLabel(out.month) + ' ' + repYearLabel(out.year);
     return out;
   }
 
@@ -561,28 +546,40 @@
   /* ── 换算 ─────────────────────────────────────────────── */
   var refreshConverter = null;
 
-  function initConverter() {
+  /* 月份下拉：语言切换后需要重填，故抽成函数 */
+  function fillMonthSelects() {
+    var keepG = dom.inGM.value;
+    var keepR = dom.inRM.value;
+
     var f = document.createDocumentFragment();
     for (var i = 1; i <= 12; i++) {
       var o = document.createElement('option');
       o.value = String(i);
-      o.textContent = i + ' 月';
+      o.textContent = I.gregMonthLabel(i);
       f.appendChild(o);
     }
+    dom.inGM.innerHTML = '';
     dom.inGM.appendChild(f);
+    if (keepG) dom.inGM.value = keepG;
 
     var f2 = document.createDocumentFragment();
     for (var m = 1; m <= 12; m++) {
       var om = document.createElement('option');
       om.value = String(m);
-      om.textContent = DATA.months[m - 1].cn + ' · ' + DATA.months[m - 1].fr;
+      om.textContent = I.repMonthLabel(m);
       f2.appendChild(om);
     }
     var om13 = document.createElement('option');
     om13.value = '13';
-    om13.textContent = '补充日 · Sansculottides';
+    om13.textContent = I.repMonthLabel(13);
     f2.appendChild(om13);
+    dom.inRM.innerHTML = '';
     dom.inRM.appendChild(f2);
+    if (keepR) dom.inRM.value = keepR;
+  }
+
+  function initConverter() {
+    fillMonthSelects();
 
     function fillRDays() {
       var y = parseInt(dom.inRY.value, 10);
@@ -594,7 +591,7 @@
       for (var d = 1; d <= len; d++) {
         var o = document.createElement('option');
         o.value = String(d);
-        o.textContent = d + ' 日';
+        o.textContent = I.mode() === 'zh' ? d + ' 日' : String(d);
         dom.inRD.appendChild(o);
       }
       dom.inRD.value = String(Math.min(keep, len));
@@ -605,35 +602,32 @@
       var mo = parseInt(dom.inGM.value, 10);
       var d = parseInt(dom.inGD.value, 10);
       var out = dom.outRep;
-      if (!isFinite(y) || !isFinite(mo) || !isFinite(d)) { out.textContent = '日期无效'; return; }
+      if (!isFinite(y) || !isFinite(mo) || !isFinite(d)) { out.textContent = t('conv.invalid'); return; }
       var probe = new Date(Date.UTC(y, mo - 1, d));
       if (probe.getUTCFullYear() !== y || probe.getUTCMonth() !== mo - 1 || probe.getUTCDate() !== d) {
-        out.textContent = '日期无效';
+        out.textContent = t('conv.invalid');
         return;
       }
       var idx = RC.dayFromGreg(y, mo, d);
       var r = RC.fromDayIndex(idx, S.rule);
-      var ml = monthLabel(r.month);
-      var label = r.month >= 13
-        ? (r.day + ' 补充日 an ' + RC.roman(r.year))
-        : (r.day + ' ' + DATA.months[r.month - 1].fr + ' an ' + RC.roman(r.year));
-      out.textContent = label + ' ／ ' + ml.cn + r.day + '日';
-      var dd = RC.dayDedication(r.month, r.day);
-      if (dd) {
-        var item = document.createElement('span');
-        item.className = 'conv-item';
-        item.textContent = ' · ' + dd.cn + ' · ' + dd.fr;
-        out.appendChild(item);
-      }
+      var roman = r.year > 0 ? RC.roman(r.year) : String(r.year);
+      var monthFr = r.month === 13 ? '' : DATA.months[r.month - 1].fr;
+      var monthCn = r.month === 13 ? '' : DATA.months[r.month - 1].cn;
+      var dd = RC.dayDedication(r.month, r.day) || { cn: '', en: '', fr: '' };
+      var item = I.mode() === 'zh' ? (dd.cn + ' · ' + dd.fr)
+        : (I.mode() === 'en' ? ((dd.en || dd.fr) + ' · ' + dd.fr) : dd.fr);
+      out.textContent = t(r.month === 13 ? 'conv.repDateComp' : 'conv.repDate', {
+        day: r.day, monthFr: monthFr, monthCn: monthCn, year: roman, item: item
+      });
     }
 
     function rToG() {
       var y = parseInt(dom.inRY.value, 10);
       var m = parseInt(dom.inRM.value, 10);
       var d = parseInt(dom.inRD.value, 10);
-      if (!isFinite(y) || !isFinite(m) || !isFinite(d)) { dom.outGreg.textContent = '日期无效'; return; }
+      if (!isFinite(y) || !isFinite(m) || !isFinite(d)) { dom.outGreg.textContent = t('conv.invalid'); return; }
       var g = RC.gregFromDay(RC.toDayIndex(y, m, d, S.rule));
-      dom.outGreg.textContent = g.y + ' 年 ' + g.m + ' 月 ' + g.d + ' 日';
+      dom.outGreg.textContent = I.gregDate(g.y, g.m, g.d);
     }
 
     [dom.inGY, dom.inGD].forEach(function (i) { i.addEventListener('input', gToR); });
@@ -643,15 +637,20 @@
     dom.inRD.addEventListener('change', rToG);
 
     refreshConverter = function () {
+      fillMonthSelects();
       var keep = parseInt(dom.inRD.value, 10) || 1;
       var y = parseInt(dom.inRY.value, 10) || 1;
       var m = parseInt(dom.inRM.value, 10) || 1;
       var len = m >= 13 ? (RC.yearLength(y, S.rule) - 360) : 30;
       while (dom.inRD.options.length > len) dom.inRD.remove(dom.inRD.options.length - 1);
+      for (var di = 0; di < dom.inRD.options.length; di++) {
+        var n = di + 1;
+        dom.inRD.options[di].textContent = I.mode() === 'zh' ? n + ' 日' : String(n);
+      }
       while (dom.inRD.options.length < len) {
         var o = document.createElement('option');
         o.value = String(dom.inRD.options.length + 1);
-        o.textContent = (dom.inRD.options.length + 1) + ' 日';
+        o.textContent = I.mode() === 'zh' ? (dom.inRD.options.length + 1) + ' 日' : String(dom.inRD.options.length + 1);
         dom.inRD.appendChild(o);
       }
       dom.inRD.value = String(Math.min(keep, len));
@@ -672,12 +671,12 @@
     var yl = RC.yearLength(r.year, S.rule);
     var doy = idx - ys + 1;
     var pct = ((doy - 1) / yl) * 100;
-    setText(dom.ybCount, '第 ' + doy + ' / ' + yl + ' 日');
+    setText(dom.ybCount, t('yb.count', { doy: doy, len: yl }));
     dom.ybFill.style.width = pct.toFixed(2) + '%';
     dom.ybMark.style.left = pct.toFixed(2) + '%';
     var a = RC.gregFromDay(ys), b = RC.gregFromDay(ys + yl - 1);
-    setText(dom.ybStart, a.y + ' 年 ' + a.m + ' 月 ' + a.d + ' 日');
-    setText(dom.ybEnd, b.y + ' 年 ' + b.m + ' 月 ' + b.d + ' 日');
+    setText(dom.ybStart, I.gregDateShort(a.y, a.m, a.d));
+    setText(dom.ybEnd, I.gregDateShort(b.y, b.m, b.d));
   }
 
   /* ── 设置 ─────────────────────────────────────────────── */
@@ -716,15 +715,11 @@
     });
     setSeg('tzSeg', S.tz);
     setSeg('themeSeg', S.theme);
-    setSeg('fmtSeg', S.fmt);
+    setSeg('langSeg', S.lang);
 
-    setText(dom.ruleBadge, S.rule === 'romme' ? '定长规则 · 罗姆' : '秋分精确法');
-    setText(dom.tzNote, S.tz === 'paris'
-      ? '以巴黎子午线平太阳时零时为共和历 0 时。'
-      : '以本机当地零时为共和历 0 时。');
+    setText(dom.ruleBadge, S.rule === 'romme' ? t('badge.romme') : t('badge.equinox'));
+    setText(dom.tzNote, S.tz === 'paris' ? t('tz.noteParis') : t('tz.noteLocal'));
 
-    dom.btn24.classList.toggle('off', S.fmt === 'dec');
-    dom.btn24.title = S.fmt === 'dec' ? '显示 24 小时制' : '隐藏 24 小时制';
   }
 
   function segHandler(id, cb) {
@@ -746,12 +741,11 @@
     });
     segHandler('tzSeg', function (v) { S.tz = v; saveSettings(); syncSettingsUI(); refreshAll(); });
     segHandler('themeSeg', function (v) { S.theme = v; saveSettings(); applyTheme(); syncSettingsUI(); });
-    segHandler('fmtSeg', function (v) { S.fmt = v; saveSettings(); syncSettingsUI(); });
-
-    dom.btn24.addEventListener('click', function () {
-      S.fmt = S.fmt === 'dec' ? 'both' : 'dec';
-      saveSettings();
+    segHandler('langSeg', function (v) {
+      S.lang = v; saveSettings();
+      I.setSetting(v);
       syncSettingsUI();
+      I.refresh();
     });
 
     if (window.matchMedia) {
@@ -886,8 +880,22 @@
     ticking = false;
   }
 
+  function applyStaticTitles() {
+    var t1 = document.querySelector('.ph-text h1');
+    if (t1) t1.textContent = t('app.name');
+    var t2 = document.getElementById('phSub');
+    if (t2) t2.textContent = I.mode() === 'fr' ? 'Horloge décimale' : 'Calendrier républicain';
+  }
+
   function boot() {
     loadSettings();
+    I.applyStatic();
+    applyStaticTitles();
+    I.onChange(function () {
+      applyStaticTitles();
+      syncSettingsUI();
+      refreshAll();
+    });
     applyInsets();
     applyTheme();
     syncSettingsUI();
@@ -926,7 +934,7 @@
         if (pageIdx !== 0) { setPage(0, true); return true; }
         return false;
       },
-      state: function () { return { rule: S.rule, tz: S.tz, theme: S.theme, fmt: S.fmt }; }
+      state: function () { return { rule: S.rule, tz: S.tz, theme: S.theme, lang: S.lang, mode: I.mode() }; }
     };
   }
 

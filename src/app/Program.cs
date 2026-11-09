@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -110,6 +110,7 @@ namespace RepublicanCalendar
 
             Extract("www.index.html", Path.Combine(www, "index.html"));
             Extract("www.app.js", Path.Combine(www, "app.js"));
+            Extract("www.i18n.js", Path.Combine(www, "i18n.js"));
             Extract("www.calendar.js", Path.Combine(www, "calendar.js"));
             Extract("www.styles.css", Path.Combine(www, "styles.css"));
             Extract("www.data.js", Path.Combine(www, "data.js"));

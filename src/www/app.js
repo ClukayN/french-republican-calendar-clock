@@ -13,18 +13,12 @@
   var SVGNS = 'http://www.w3.org/2000/svg';
   var CX = 240, CY = 240;
 
-  var WEEKDAYS = [
-    { fr: 'Primidi', cn: '一日' }, { fr: 'Duodi', cn: '二日' }, { fr: 'Tridi', cn: '三日' },
-    { fr: 'Quartidi', cn: '四日' }, { fr: 'Quintidi', cn: '五日' }, { fr: 'Sextidi', cn: '六日' },
-    { fr: 'Septidi', cn: '七日' }, { fr: 'Octidi', cn: '八日' }, { fr: 'Nonidi', cn: '九日' },
-    { fr: 'Décadi', cn: '十日' }
-  ];
-  var GREG_WEEK = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-  var CN_DIGIT = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-  var FR_MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  var I = window.I18N;
+  function t(k, v) { return I.t(k, v); }
+  function isZh() { return I.mode() === 'zh'; }
 
   /* ── 设置 ─────────────────────────────────────────────── */
-  var DEFAULTS = { rule: 'romme', tz: 'local', theme: 'auto', fmt: 'both' };
+  var DEFAULTS = { rule: 'romme', tz: 'local', theme: 'auto', lang: 'auto' };
   var S = Object.assign({}, DEFAULTS);
   var STORE_KEY = 'rc.settings.v1';
 
@@ -38,6 +32,7 @@
         });
       }
     } catch (e) { /* 忽略 */ }
+    I.setSetting(S.lang);
   }
   function saveSettings() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { /* 忽略 */ }
@@ -92,7 +87,7 @@
   function repOf(dayIndex) {
     var r = RC.fromDayIndex(dayIndex, S.rule);
     r.decade = r.month === 13 ? 0 : Math.floor((r.day - 1) / 10) + 1;
-    r.weekday = r.month === 13 ? null : WEEKDAYS[(r.day - 1) % 10];
+    r.weekday = r.month === 13 ? null : I.weekdayOf((r.day - 1) % 10);
     r.info = RC.dayDedication(r.month, r.day);
     return r;
   }
@@ -238,7 +233,7 @@
   ['dh', 'dm', 'ds', 'stdClock', 'plateDoy', 'plateDecade', 'plateMonth', 'plateMonthCn',
     'plateYear', 'plateYearCn', 'plateGreg', 'dediCat', 'dediMode', 'dediFr', 'dediCn',
     'dediDesc', 'mtCn', 'mtFr', 'mtYear', 'decades', 'ruleBadge', 'footTz', 'footRule',
-    'footInfo', 'scaleNote', 'tzNote', 'btn24', 'btnTheme',
+    'footInfo', 'scaleNote', 'tzNote', 'btnTheme',
     'plateNote', 'ybCount', 'ybFill', 'ybMark', 'ybStart', 'ybEnd',
     'btnPrevYear', 'btnNextYear', 'btnYearPick', 'yearPop', 'yearIn', 'yearGo',
     'gregYearIn', 'monthInRep', 'gregMonthIn', 'repRow', 'gregRow', 'yearPreview'].forEach(function (id) {
@@ -262,14 +257,9 @@
     if (dom.ds.textContent !== pad2(s)) dom.ds.textContent = pad2(s);
 
     var cur = parts.sec % 60;
-    if (S.fmt === 'dec') {
-      /* 24 时制收起时按钮仍留在原位，作为「点一下展开」的幽灵 chip */
-      if (dom.stdClock.textContent !== '24 时') dom.stdClock.textContent = '24 时';
-    } else {
-      var stdStr = pad2(Math.floor(parts.sec / 3600)) + ':' +
-        pad2(Math.floor(parts.sec / 60) % 60) + ':' + pad2(Math.floor(cur));
-      if (dom.stdClock.textContent !== stdStr) dom.stdClock.textContent = stdStr;
-    }
+    var stdStr = pad2(Math.floor(parts.sec / 3600)) + ':' +
+      pad2(Math.floor(parts.sec / 60) % 60) + ':' + pad2(Math.floor(cur));
+    if (dom.stdClock.textContent !== stdStr) dom.stdClock.textContent = stdStr;
 
     /* 指针角度：全部由当日绝对秒数导出 */
     var a24 = parts.sec / 86400 * 360;
@@ -283,36 +273,36 @@
   }
 
   function monthLabel(month) {
-    if (month >= 13) return { fr: 'Jours complémentaires', cn: '互补日', note: 'Sansculottides' };
+    if (month >= 13) return { fr: 'Jours complémentaires', cn: '补充日', en: '', note: 'Sansculottides' };
     var mi = DATA.months[month - 1];
-    return { fr: mi.fr, cn: mi.cn, note: mi.season };
+    return { fr: mi.fr, cn: mi.cn, en: mi.en || '', note: mi.season };
   }
 
   function renderDate(r, greg, idx) {
-    var ml = monthLabel(r.month);
+    var isComp = r.month === 13;
 
-    /* 日期牌 */
-    if (r.month === 13) {
-      dom.plateDoy.textContent = '第 ' + r.day + ' 闰日';
-      dom.plateDecade.textContent = '补充日 · Sansculottides';
-      dom.plateMonth.textContent = 'JOURS COMPLÉMENTAIRES';
-      dom.plateMonthCn.textContent = '补充日';
-      dom.plateNote.textContent = '岁末六日 · 共和之节庆';
+    if (isComp) {
+      var compInfo = RC.dayDedication(13, r.day) || { fr: '', cn: '', en: '', desc: '' };
+      dom.plateDoy.textContent = t('plate.doyComp', { n: r.day });
+      dom.plateDecade.textContent = t('plate.decadeComp');
+      dom.plateMonth.textContent = I.mode() === 'zh' ? 'JOURS COMPLÉMENTAIRES' : 'SANS-CULOTTIDES';
+      dom.plateMonthCn.textContent = I.mode() === 'fr' ? (compInfo.fr || '') : t('plate.complementary');
+      dom.plateNote.textContent = t('plate.noteComp');
     } else {
       var mi = DATA.months[r.month - 1];
-      dom.plateDoy.textContent = '第 ' + r.day + ' 日';
-      dom.plateDecade.textContent = '第' + cnNumber(r.decade) + '旬 · ' + r.weekday.fr;
-      dom.plateMonth.textContent = ml.fr;
-      dom.plateMonthCn.textContent = ml.cn;
-      dom.plateNote.textContent = mi.season + ' · ' + mi.note;
+      dom.plateDoy.textContent = t('plate.doy', { n: r.day });
+      dom.plateDecade.textContent = I.decade(r.decade) + ' · ' + I.weekdayOf((r.day - 1) % 10);
+      dom.plateMonth.textContent = I.monthUpper(r.month);
+      dom.plateMonthCn.textContent = I.monthSecondary(r.month) || '';
+      dom.plateNote.textContent = I.season(mi.season) + ' · ' +
+        (I.mode() === 'fr' ? (mi.noteFr || mi.note) : (I.mode() === 'en' ? (mi.noteEn || mi.note) : mi.note));
     }
-    dom.plateYear.textContent = r.year > 0 ? 'AN ' + RC.roman(r.year) : 'AVANT L\'ÈRE';
-    dom.plateYearCn.textContent = r.year > 0
-      ? '共和' + cnNumber(r.year) + '年'
-      : '共和纪元前' + cnNumber(1 - r.year) + '年';
 
-    var gw = new Date(Date.UTC(greg.y, greg.m - 1, greg.d)).getUTCDay();
-    dom.plateGreg.textContent = greg.y + ' 年 ' + greg.m + ' 月 ' + greg.d + ' 日 · ' + GREG_WEEK[gw];
+    dom.plateYear.textContent = I.repYear(r.year);
+    dom.plateYearCn.textContent = I.repYearSub(r.year);
+    dom.plateYearCn.style.display = I.mode() === 'fr' ? 'none' : '';
+
+    dom.plateGreg.textContent = I.gregDate(greg.y, greg.m, greg.d, { weekday: true });
 
     /* 年进度 */
     var ys = RC.toDayIndex(r.year, 1, 1, S.rule);
@@ -321,59 +311,85 @@
     if (doy < 1) doy = 1;
     if (doy > yl) doy = yl;
     var pct = (doy - 1) / yl * 100;
-    dom.ybCount.textContent = '第 ' + doy + ' / ' + yl + ' 日';
+    dom.ybCount.textContent = t('yb.count', { doy: doy, len: yl });
     dom.ybFill.style.width = pct.toFixed(2) + '%';
     dom.ybMark.style.left = pct.toFixed(2) + '%';
     var gs = RC.gregFromDay(ys), ge = RC.gregFromDay(ys + yl - 1);
-    dom.ybStart.textContent = gs.y + ' 年 ' + gs.m + ' 月 ' + gs.d + ' 日';
-    dom.ybEnd.textContent = ge.y + ' 年 ' + ge.m + ' 月 ' + ge.d + ' 日';
+    dom.ybStart.textContent = I.gregDateShort(gs.y, gs.m, gs.d);
+    dom.ybEnd.textContent = I.gregDateShort(ge.y, ge.m, ge.d);
 
     /* 物产卡 */
-    var info = r.info || { fr: '—', cn: '—', cat: '', desc: '' };
-    dom.dediCat.textContent = info.cat || '—';
+    var info = r.info;
+    if (!info) {
+      dom.dediCat.textContent = '';
+      dom.dediFr.textContent = '';
+      dom.dediCn.textContent = '—';
+      dom.dediDesc.textContent = '';
+      return;
+    }
+    dom.dediCat.textContent = I.cat(info.cat) || t('chip.cat');
     dom.dediFr.textContent = info.fr || '';
-    dom.dediCn.textContent = info.cn || '';
-    dom.dediDesc.textContent = info.desc || '';
+    dom.dediFr.style.display = (I.mode() === 'fr' || !info.fr) ? 'none' : '';
+    dom.dediCn.textContent = I.mode() === 'zh' ? (info.cn || '') : (info.en || info.cn || '');
+    dom.dediDesc.textContent = I.dayDesc(info) || '';
   }
 
   function renderMonth() {
     var y = view.year, m = view.month;
-    var ml = monthLabel(m);
-    dom.mtCn.textContent = ml.cn;
-    dom.mtFr.textContent = ml.fr.toUpperCase();
+    var isComp = m >= 13;
+
+    if (I.mode() === 'zh') {
+      dom.mtCn.textContent = isComp ? t('plate.complementary') : DATA.months[m - 1].cn;
+      dom.mtFr.textContent = isComp ? 'SANS-CULOTTIDES' : DATA.months[m - 1].fr.toUpperCase();
+      dom.mtFr.style.display = '';
+    } else {
+      dom.mtCn.textContent = isComp ? t('conv.complementary') : I.monthUpper(m);
+      var sec = isComp ? '' : (I.mode() === 'en' ? (DATA.months[m - 1].en || '') : '');
+      dom.mtFr.textContent = sec ? sec.toUpperCase() : '';
+      dom.mtFr.style.display = sec ? '' : 'none';
+    }
     dom.mtYear.textContent = repYearLabel(y);
 
     var startIdx = RC.toDayIndex(y, m, 1, S.rule);
-    var len = m >= 13 ? (RC.yearLength(y, S.rule) - 360) : 30;
-    var todayIdx = RC.dayFromGreg.apply(null, [0, 1, 1]);   /* 占位，稍后覆盖 */
+    var len = isComp ? (RC.yearLength(y, S.rule) - 360) : 30;
     var np = nowParts();
-    todayIdx = np.dayIndex;
+    var todayIdx = np.dayIndex;
+
+    function cellTitle(day, dd) {
+      var parts = [String(day)];
+      if (dd.en) parts.push(dd.en);
+      if (dd.fr) parts.push(dd.fr);
+      if (dd.cn) parts.push(dd.cn);
+      return parts.join(' · ');
+    }
 
     var html = '';
-    if (m >= 13) {
-      html += '<div class="decade"><div class="decade-label"><b>补充日</b>Sansculottides</div>';
+    if (isComp) {
+      html += '<div class="decade"><div class="decade-label"><b>' + t('decade.labelComp') +
+        '</b>' + (I.mode() === 'zh' ? 'Sansculottides' : '') + '</div>';
       for (var d = 1; d <= len; d++) {
-        var info = RC.dayDedication(13, d) || { fr: '—', cn: '' };
-        var cls = 'day complementary' + (startIdx + d - 1 === todayIdx ? ' today' : '');
+        var info = RC.dayDedication(13, d) || { fr: '', cn: '', en: '' };
+        var cls = 'day complementary' + (startIdx + d - 1 === todayIdx ? ' today' : '') +
+          (selection === startIdx + d - 1 ? ' selected' : '');
         html += '<button class="' + cls + '" type="button" data-i="' + (startIdx + d - 1) + '" title="' +
-          d + ' ' + info.fr + ' ' + info.cn + '">' +
-          '<span class="dn">' + (d === 6 ? '6' : d) + '</span>' +
-          '<span class="dd">' + (info.cn || '') + '</span></button>';
+          cellTitle(d, info) + '">' +
+          '<span class="dn">' + d + '</span>' +
+          '<span class="dd">' + I.dayName(info) + '</span></button>';
       }
       html += '</div>';
     } else {
       for (var dec = 0; dec < 3; dec++) {
-        html += '<div class="decade"><div class="decade-label"><b>第' + cnNumber(dec + 1) + '旬</b>Décade ' +
-          RC.roman(dec + 1) + '</div>';
+        html += '<div class="decade"><div class="decade-label"><b>' + I.decade(dec + 1) + '</b>' +
+          (I.mode() === 'zh' ? 'DÉCADE ' + RC.roman(dec + 1) : '') + '</div>';
         for (var i = 0; i < 10; i++) {
           var day = dec * 10 + i + 1;
           var idx = startIdx + day - 1;
-          var dd = RC.dayDedication(m, day) || { fr: '—', cn: '' };
+          var dd = RC.dayDedication(m, day) || { fr: '', cn: '', en: '' };
           var c = 'day' + (idx === todayIdx ? ' today' : '') + (selection === idx ? ' selected' : '');
           html += '<button class="' + c + '" type="button" data-i="' + idx + '" title="' +
-            day + ' ' + dd.fr + ' ' + dd.cn + '">' +
+            cellTitle(day, dd) + '">' +
             '<span class="dn">' + day + '</span>' +
-            '<span class="dd">' + dd.cn + '</span></button>';
+            '<span class="dd">' + I.dayName(dd) + '</span></button>';
         }
         html += '</div>';
       }
@@ -396,19 +412,22 @@
   function renderSelectionCard() {
     if (selection === null) {
       var np = nowParts();
-      var r = repOf(np.dayIndex);
-      renderDate(r, np.greg, np.dayIndex);
-      dom.dediMode.textContent = '今日物产';
+      renderDate(repOf(np.dayIndex), np.greg, np.dayIndex);
     } else {
-      var rr = repOf(selection);
-      var g = RC.gregFromDay(selection);
-      renderDate(rr, g, selection);
-      dom.dediMode.textContent = '所选日期';
+      renderDate(repOf(selection), RC.gregFromDay(selection), selection);
     }
   }
 
   function updateModeChip() {
-    dom.dediMode.textContent = selection === null ? '今日物产' : '所选日期';
+    var isComp = false;
+    if (selection === null) {
+      var np = nowParts();
+      isComp = repOf(np.dayIndex).month >= 13;
+    } else {
+      isComp = repOf(selection).month >= 13;
+    }
+    dom.dediMode.textContent = isComp ? t('chip.festival')
+      : (selection === null ? t('chip.today') : t('chip.selected'));
   }
 
   /* ══════════════════════════════════════════════════════
@@ -416,24 +435,33 @@
      ══════════════════════════════════════════════════════ */
   function initConverter() {
     var gM = document.getElementById('inGM');
-    for (var m = 1; m <= 12; m++) {
-      var o = document.createElement('option');
-      o.value = m; o.textContent = m + ' 月';
-      gM.appendChild(o);
-    }
-    gM.value = 11;
-
     var rM = document.getElementById('inRM');
-    for (var k = 1; k <= 13; k++) {
-      var o2 = document.createElement('option');
-      o2.value = k;
-      o2.textContent = k === 13 ? '互补日' : (DATA.months[k - 1].cn + ' · ' + DATA.months[k - 1].fr);
-      rM.appendChild(o2);
-    }
-    rM.value = 2;
-
     var gY = document.getElementById('inGY'), gD = document.getElementById('inGD');
     var rY = document.getElementById('inRY'), rD = document.getElementById('inRD');
+
+    function fillGregMonths() {
+      var keep = parseInt(gM.value, 10) || 11;
+      gM.innerHTML = '';
+      for (var m = 1; m <= 12; m++) {
+        var o = document.createElement('option');
+        o.value = m;
+        o.textContent = I.gregMonthLabel(m);
+        gM.appendChild(o);
+      }
+      gM.value = keep;
+    }
+
+    function fillRepMonths() {
+      var keep = parseInt(rM.value, 10) || 2;
+      rM.innerHTML = '';
+      for (var k = 1; k <= 13; k++) {
+        var o = document.createElement('option');
+        o.value = k;
+        o.textContent = I.repMonthLabel(k);
+        rM.appendChild(o);
+      }
+      rM.value = keep;
+    }
 
     function fillRDays() {
       var y = parseInt(rY.value, 10), m = parseInt(rM.value, 10);
@@ -443,7 +471,7 @@
       rD.innerHTML = '';
       for (var d = 1; d <= n; d++) {
         var o = document.createElement('option');
-        o.value = d; o.textContent = d + ' 日';
+        o.value = d; o.textContent = isZh() ? d + ' 日' : String(d);
         rD.appendChild(o);
       }
       rD.value = Math.min(keep, n);
@@ -453,24 +481,20 @@
       var y = parseInt(gY.value, 10), m = parseInt(gM.value, 10), d = parseInt(gD.value, 10);
       var out = document.getElementById('outRep');
       if (!isFinite(y) || !isFinite(m) || !isFinite(d) || y < 1 || y > 9999) { out.textContent = '—'; return; }
-      var t = new Date(Date.UTC(y, m - 1, d));
-      if (t.getUTCFullYear() !== y || t.getUTCMonth() + 1 !== m || t.getUTCDate() !== d) {
-        out.textContent = '日期无效'; return;
+      var probe = new Date(Date.UTC(y, m - 1, d));
+      if (probe.getUTCFullYear() !== y || probe.getUTCMonth() + 1 !== m || probe.getUTCDate() !== d) {
+        out.textContent = t('conv.invalid'); return;
       }
       var r = repOf(RC.dayFromGreg(y, m, d));
-      var label = r.month === 13
-        ? (r.day + ' 补充日')
-        : (r.day + ' ' + DATA.months[r.month - 1].fr);
-      /* 日期 + 当日物产写在同一条结果里 */
-      out.textContent = label + ' an ' + (r.year > 0 ? RC.roman(r.year) : r.year) +
-        ' ／ ' + (r.month === 13 ? '补充日' : DATA.months[r.month - 1].cn) + r.day + '日';
-      var dd = RC.dayDedication(r.month, r.day);
-      if (dd) {
-        var item = document.createElement('span');
-        item.className = 'conv-item';
-        item.textContent = ' · ' + dd.cn + ' · ' + dd.fr;
-        out.appendChild(item);
-      }
+      var roman = r.year > 0 ? RC.roman(r.year) : String(r.year);
+      var monthFr = r.month === 13 ? '' : DATA.months[r.month - 1].fr;
+      var monthCn = r.month === 13 ? '' : DATA.months[r.month - 1].cn;
+      var dd = RC.dayDedication(r.month, r.day) || { cn: '', en: '', fr: '' };
+      var item = I.mode() === 'zh' ? (dd.cn + ' · ' + dd.fr)
+        : (I.mode() === 'en' ? ((dd.en || dd.fr) + ' · ' + dd.fr) : dd.fr);
+      out.textContent = t(r.month === 13 ? 'conv.repDateComp' : 'conv.repDate', {
+        day: r.day, monthFr: monthFr, monthCn: monthCn, year: roman, item: item
+      });
     }
 
     function rToG() {
@@ -478,23 +502,28 @@
       var out = document.getElementById('outGreg');
       if (!isFinite(y) || !isFinite(m) || !isFinite(d)) { out.textContent = '—'; return; }
       var maxDay = m === 13 ? (y > 0 ? RC.yearLength(y, S.rule) - 360 : 6) : 30;
-      if (d < 1 || d > maxDay) { out.textContent = '日期无效'; return; }
+      if (d < 1 || d > maxDay) { out.textContent = t('conv.invalid'); return; }
       var idx = RC.toDayIndex(y, m, d, S.rule);
       var g = RC.gregFromDay(idx);
-      out.textContent = g.y + ' 年 ' + g.m + ' 月 ' + g.d + ' 日';
+      out.textContent = I.gregDate(g.y, g.m, g.d);
     }
 
-    [gY, gD].forEach(function (x) { x.addEventListener('input', gToR); });
+    gY.addEventListener('input', gToR);
+    gD.addEventListener('input', gToR);
     gM.addEventListener('change', gToR);
-    [rY].forEach(function (x) { x.addEventListener('input', function () { fillRDays(); rToG(); }); });
+    rY.addEventListener('input', function () { fillRDays(); rToG(); });
     rM.addEventListener('change', function () { fillRDays(); rToG(); });
     rD.addEventListener('change', rToG);
 
+    fillGregMonths();
+    fillRepMonths();
     fillRDays();
     gToR(); rToG();
 
     /* 年长/年首会随置闰规则变化，所以规则切换后需重新计算 */
-    refreshConverter = function () { fillRDays(); gToR(); rToG(); };
+    refreshConverter = function () {
+      fillGregMonths(); fillRepMonths(); fillRDays(); gToR(); rToG();
+    };
   }
 
   /* ══════════════════════════════════════════════════════
@@ -514,20 +543,14 @@
     });
     setSeg('tzSeg', S.tz);
     setSeg('themeSeg', S.theme);
-    setSeg('fmtSeg', S.fmt);
 
-    dom.ruleBadge.textContent = S.rule === 'romme' ? '定长规则 · 罗姆' : '秋分精确法';
-    dom.footRule.textContent = S.rule === 'romme' ? '置闰：罗姆定长规则' : '置闰：巴黎秋分精确法';
-    dom.footInfo.textContent = S.rule === 'romme'
-      ? '共和四年起每 4 年一闰 · 世纪修正'
-      : '岁首依巴黎秋分真时刻';
-    dom.footTz.textContent = S.tz === 'paris' ? '巴黎平太阳时 · UTC+9m21s' : '本地时间 · ' + LOCAL_TZ;
-    dom.tzNote.textContent = S.tz === 'paris'
-      ? '以巴黎子午线（东经 2°20′14″）平太阳时的零时为共和历 0 时，与法国大革命时期一致。'
-      : '以本机当地零时为共和历 0 时。';
+    dom.ruleBadge.textContent = S.rule === 'romme' ? t('badge.romme') : t('badge.equinox');
+    dom.footRule.textContent = S.rule === 'romme' ? t('foot.ruleRomme') : t('foot.ruleEquinox');
+    dom.footInfo.textContent = S.rule === 'romme' ? t('foot.scaleRomme') : t('foot.scaleEquinox');
+    dom.footTz.textContent = S.tz === 'paris' ? t('foot.tzParis') : t('foot.tzLocal', { tz: LOCAL_TZ });
+    dom.tzNote.textContent = S.tz === 'paris' ? t('tz.noteParis') : t('tz.noteLocal');
 
-    dom.btn24.classList.toggle('off', S.fmt === 'dec');
-    dom.btn24.title = S.fmt === 'dec' ? '显示 24 小时制' : '隐藏 24 小时制';
+    setSeg('langSeg', S.lang);
   }
 
   function setSeg(id, val) {
@@ -547,7 +570,12 @@
 
     segHandler('tzSeg', function (v) { S.tz = v; saveSettings(); syncSettingsUI(); refreshAll(); });
     segHandler('themeSeg', function (v) { S.theme = v; saveSettings(); applyTheme(); syncSettingsUI(); });
-    segHandler('fmtSeg', function (v) { S.fmt = v; saveSettings(); syncSettingsUI(); });
+    segHandler('langSeg', function (v) {
+      S.lang = v; saveSettings();
+      I.setSetting(v);
+      syncSettingsUI();
+      I.refresh();
+    });
 
     document.getElementById('btnTheme').addEventListener('click', function () {
       var cur = document.documentElement.getAttribute('data-theme');
@@ -628,7 +656,7 @@
 
   /* 年号标签：共和纪年前为「前 N 年」 */
   function repYearLabel(y) {
-    return y > 0 ? 'AN ' + RC.roman(y) : '前' + cnNumber(1 - y) + '年';
+    return I.repYear(y);
   }
 
   function shiftYear(dir) {
@@ -653,25 +681,24 @@
 
   function fillYearSelects() {
     var rep = dom.monthInRep, greg = dom.gregMonthIn;
+    var i, opt;
+
     if (rep.options.length === 0) {
-      var i, opt;
-      for (i = 1; i <= 12; i++) {
+      for (i = 1; i <= 13; i++) {
         opt = document.createElement('option');
         opt.value = String(i);
-        opt.textContent = DATA.months[i - 1].cn + ' · ' + DATA.months[i - 1].fr;
+        opt.textContent = I.repMonthLabel(i);
         rep.appendChild(opt);
       }
-      opt = document.createElement('option');
-      opt.value = '13';
-      opt.textContent = '补充日 · Sansculottides';
-      rep.appendChild(opt);
-
       for (i = 1; i <= 12; i++) {
         opt = document.createElement('option');
         opt.value = String(i);
-        opt.textContent = i + ' 月 · ' + FR_MONTHS[i - 1];
+        opt.textContent = I.gregMonthLabel(i);
         greg.appendChild(opt);
       }
+    } else {
+      for (i = 1; i <= 13; i++) rep.options[i - 1].textContent = I.repMonthLabel(i);
+      for (i = 1; i <= 12; i++) greg.options[i - 1].textContent = I.gregMonthLabel(i);
     }
   }
 
@@ -706,9 +733,8 @@
   }
 
   function updateYearPreview() {
-    var t = targetOfInputs();
-    var ml = monthLabel(t.month);
-    dom.yearPreview.textContent = '→ ' + t.gregText + ml.cn + ' ' + repYearLabel(t.year);
+    var tg = targetOfInputs();
+    dom.yearPreview.textContent = '→ ' + I.monthLabel(tg.month) + ' ' + repYearLabel(tg.year);
   }
 
   function setYearMode(mode) {
@@ -831,6 +857,8 @@
   /* ── 启动 ─────────────────────────────────────────────── */
   function boot() {
     loadSettings();
+    I.applyStatic();
+    I.onChange(function () { refreshAll(); syncSettingsUI(); });
     applyTheme();
     buildDial();
     syncSettingsUI();
@@ -850,10 +878,6 @@
 
     document.getElementById('btnPrevMonth').addEventListener('click', function () { shiftMonth(-1); });
     document.getElementById('btnNextMonth').addEventListener('click', function () { shiftMonth(1); });
-    document.getElementById('btn24').addEventListener('click', function () {
-      S.fmt = S.fmt === 'both' ? 'dec' : 'both';
-      saveSettings(); syncSettingsUI();
-    });
 
     var np = nowParts();
     var r0 = repOf(np.dayIndex);

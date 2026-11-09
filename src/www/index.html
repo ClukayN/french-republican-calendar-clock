@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>法国共和历 · Calendrier républicain</title>
+<title data-i18n-doctitle="app.documentTitle">法国共和历 · Calendrier républicain</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -17,19 +17,19 @@
         <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18.5" /><path d="M20 6v28M8.6 12.6l22.8 14.8M31.4 12.6L8.6 27.4" /><circle cx="20" cy="20" r="4.6" class="solid" /></svg>
       </div>
       <div class="brand-text">
-        <h1>法国共和历</h1>
-        <p>Calendrier républicain · 十进制时钟</p>
+        <h1 data-i18n="app.name">法国共和历</h1>
+        <p data-i18n="app.sub">Calendrier républicain · 十进制时钟</p>
       </div>
     </div>
 
     <div class="topbar-tools">
       <span class="rule-badge" id="ruleBadge">定长规则 · 罗姆</span>
-      <button class="ghost-btn" id="btnToday" type="button">回到今日</button>
-      <button class="icon-btn" id="btnTheme" type="button" title="切换明暗" aria-label="切换明暗">
+      <button class="ghost-btn" id="btnToday" type="button" data-i18n="btn.today">回到今日</button>
+      <button class="icon-btn" id="btnTheme" type="button" title="切换明暗" aria-label="切换明暗" data-i18n-title="btn.theme" data-i18n-aria="btn.theme">
         <svg viewBox="0 0 24 24" class="i-moon"><path d="M20.5 14.4A8.6 8.6 0 0 1 9.6 3.5a8.6 8.6 0 1 0 10.9 10.9Z"/></svg>
         <svg viewBox="0 0 24 24" class="i-sun"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.4v3M12 18.6v3M2.4 12h3M18.6 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>
       </button>
-      <button class="icon-btn" id="btnSettings" type="button" title="设置" aria-label="设置">
+      <button class="icon-btn" id="btnSettings" type="button" title="设置" aria-label="设置" data-i18n-title="btn.settings" data-i18n-aria="btn.settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.6M12 18.8v2.6M2.6 12h2.6M18.8 12h2.6M5.4 5.4l1.8 1.8M16.8 16.8l1.8 1.8M18.6 5.4l-1.8 1.8M7.2 16.8l-1.8 1.8"/></svg>
       </button>
     </div>
@@ -49,14 +49,14 @@
             <span class="grp" id="dh">00</span><span class="sep">:</span><span class="grp" id="dm">00</span><span class="sep">:</span><span class="grp small" id="ds">00</span>
           </div>
           <div class="digital-side">
-            <div class="dec-label">十进时<br><span class="fr">heure décimale</span></div>
-            <button class="mini-toggle" id="btn24" type="button" title="切换 24 小时制">
+            <div class="dec-label"><span data-i18n="label.decimal">十进时</span><br><span class="fr" data-i18n="label.decimalFr">heure décimale</span></div>
+            <div class="mini-toggle" id="clock24">
               <span id="stdClock">--:--:--</span>
               <span class="mini-toggle-tag">24h</span>
-            </button>
+            </div>
           </div>
         </div>
-        <div class="scale-note" id="scaleNote">1日=10共和时=1000共和分=100000共和秒，1共和秒≈0.864秒</div>
+        <div class="scale-note" id="scaleNote" data-i18n-html="note.scale">1日 = 10十进制小时 = 1,000十进制分钟 = 100,000十进制秒<span class="nw">（1十进制秒 = 0.864秒）</span></div>
       </div>
     </section>
 
@@ -87,14 +87,14 @@
 
       <div class="card converter" id="converterCard">
         <div class="conv-head">
-          <h3>日期换算 <span>Conversion</span></h3>
+          <h3><span data-i18n="conv.title">日期换算</span> <span data-i18n="conv.sub">Conversion</span></h3>
         </div>
 
         <div class="conv-row">
-          <label class="conv-tag">公历 → 共和历</label>
+          <label class="conv-tag" data-i18n="conv.toRep">公历 → 共和历</label>
           <div class="conv-inputs">
             <input id="inGY" type="number" inputmode="numeric" min="1583" max="3999" value="2026" />
-            <select id="inGM" aria-label="公历月"></select>
+            <select id="inGM" aria-label="公历月" data-i18n-aria="conv.gregMonth"></select>
             <input id="inGD" type="number" inputmode="numeric" min="1" max="31" value="8" />
             <span class="arrow">→</span>
             <output id="outRep">—</output>
@@ -102,11 +102,11 @@
         </div>
 
         <div class="conv-row">
-          <label class="conv-tag">共和历 → 公历</label>
+          <label class="conv-tag" data-i18n="conv.toGreg">共和历 → 公历</label>
           <div class="conv-inputs">
             <input id="inRY" type="number" inputmode="numeric" min="-500" max="9999" value="235" />
-            <select id="inRM" aria-label="共和月"></select>
-            <select id="inRD" aria-label="共和日"></select>
+            <select id="inRM" aria-label="共和月" data-i18n-aria="conv.repMonth"></select>
+            <select id="inRD" aria-label="共和日" data-i18n-aria="conv.repDay"></select>
             <span class="arrow">→</span>
             <output id="outGreg">—</output>
           </div>
@@ -115,7 +115,7 @@
 
       <div class="card yearbar">
         <div class="yb-head">
-          <span class="yb-title">年进度 <i>Année républicaine</i></span>
+          <span class="yb-title"><span data-i18n="yb.title">年进度</span> <i data-i18n="yb.titleFr">Année républicaine</i></span>
           <span class="yb-count" id="ybCount">第 48 / 365 日</span>
         </div>
         <div class="yb-track"><i class="yb-fill" id="ybFill"></i><b class="yb-mark" id="ybMark"></b></div>
@@ -127,25 +127,25 @@
   <!-- ── 月历（三旬） ───────────────────────────────────── -->
   <section class="panel month-panel">
     <div class="month-head">
-      <button class="nav-btn nav-year" id="btnPrevYear" type="button" title="上一年（Shift+↑）">«</button>
-      <button class="nav-btn" id="btnPrevMonth" type="button" title="上个月（←）">‹</button>
+      <button class="nav-btn nav-year" id="btnPrevYear" type="button" title="上一年（Shift+↑）" data-i18n-title="nav.prevYearTitle" data-i18n-aria="nav.prevYear">«</button>
+      <button class="nav-btn" id="btnPrevMonth" type="button" title="上个月（←）" data-i18n-title="nav.prevMonthTitle" data-i18n-aria="nav.prevMonth">‹</button>
       <div class="month-title">
         <span class="mt-cn" id="mtCn">雾月</span>
         <span class="mt-fr" id="mtFr">BRUMAIRE</span>
-        <button class="mt-year" id="btnYearPick" type="button" title="跳转到指定年份（Y）"><span id="mtYear">AN CCXXXV</span><span class="mt-caret" aria-hidden="true"></span></button>
+        <button class="mt-year" id="btnYearPick" type="button" title="跳转到指定年份（Y）" data-i18n-title="nav.yearTitle"><span id="mtYear">AN CCXXXV</span><span class="mt-caret" aria-hidden="true"></span></button>
       </div>
-      <button class="nav-btn" id="btnNextMonth" type="button" title="下个月（→）">›</button>
-      <button class="nav-btn nav-year" id="btnNextYear" type="button" title="下一年（Shift+↓）">»</button>
+      <button class="nav-btn" id="btnNextMonth" type="button" title="下个月（→）" data-i18n-title="nav.nextMonthTitle" data-i18n-aria="nav.nextMonth">›</button>
+      <button class="nav-btn nav-year" id="btnNextYear" type="button" title="下一年（Shift+↓）" data-i18n-title="nav.nextYearTitle" data-i18n-aria="nav.nextYear">»</button>
 
       <div class="year-pop" id="yearPop" hidden>
         <div class="yp-tabs" id="yearMode">
-          <button type="button" data-v="rep" class="on">共和纪年</button>
-          <button type="button" data-v="greg">公元</button>
+          <button type="button" data-v="rep" class="on" data-i18n="year.tabRep">共和纪年</button>
+          <button type="button" data-v="greg" data-i18n="year.tabGreg">公元</button>
         </div>
 
         <div class="yp-row" id="repRow">
           <input class="yp-in" id="yearIn" type="number" min="-9999" max="9999" step="1" inputmode="numeric" autocomplete="off" aria-label="共和年号（负数表示共和纪年前）">
-          <span class="yp-unit">年</span>
+          <span class="yp-unit" data-i18n="year.unit">年</span>
           <select class="yp-sel" id="monthInRep" aria-label="共和历月份"></select>
         </div>
 
@@ -167,8 +167,8 @@
         </div>
 
         <div class="yp-foot">
-          <span class="yp-note">回车跳转 · ↑↓ 逐年 · Shift+↑↓ 每十年</span>
-          <button class="yp-go" id="yearGo" type="button">跳转</button>
+          <span class="yp-note" data-i18n="year.hint">回车跳转 · ↑↓ 逐年 · Shift+↑↓ 每十年</span>
+          <button class="yp-go" id="yearGo" type="button" data-i18n="btn.jump">跳转</button>
         </div>
       </div>
     </div>
@@ -191,64 +191,67 @@
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" hidden>
   <div class="drawer-head">
-    <h3>设置 <span>Réglages</span></h3>
-    <button class="icon-btn" id="btnCloseDrawer" type="button" aria-label="关闭">
+    <h3><span data-i18n="drawer.title">设置</span> <span data-i18n="drawer.sub">Réglages</span></h3>
+    <button class="icon-btn" id="btnCloseDrawer" type="button" aria-label="关闭" data-i18n-aria="btn.close">
       <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>
     </button>
   </div>
 
   <div class="drawer-body">
     <div class="field">
-      <label class="field-label">置闰规则 <span>Intercalation</span></label>
+      <label class="field-label"><span data-i18n="field.rule">置闰规则</span> <span data-i18n="field.ruleFr">Intercalation</span></label>
       <div class="radio-cards" id="ruleCards">
         <label class="rc">
           <input type="radio" name="rule" value="romme" checked />
-          <span class="rc-title">定长规则法 · 罗姆</span>
-          <span class="rc-desc">自共和四年起每四年一闰，百年为平、四百年复闰。平均年长与公历一致，新年恒在 9 月 22／23 日。</span>
+          <span class="rc-title" data-i18n="rule.rommeTitle">定长规则法 · 罗姆</span>
+          <span class="rc-desc" data-i18n="rule.rommeDesc">自共和四年起每四年一闰，百年为平、四百年复闰。平均年长与公历一致，新年恒在 9 月 22／23 日。</span>
         </label>
         <label class="rc">
           <input type="radio" name="rule" value="equinox" />
-          <span class="rc-title">巴黎秋分精确法</span>
-          <span class="rc-desc">以巴黎子午线（UTC+9m21s）上秋分真实时刻所在日为岁首。共和元年至十四年两国之法相同。</span>
+          <span class="rc-title" data-i18n="rule.equinoxTitle">巴黎秋分精确法</span>
+          <span class="rc-desc" data-i18n="rule.equinoxDesc">以巴黎子午线（UTC+9m21s）上秋分真实时刻所在日为岁首。共和元年至十四年两国之法相同。</span>
         </label>
       </div>
-      <p class="field-note">两法在 2026 年相差一：罗姆法为 18 Brumaire，秋分法为 17 Brumaire。</p>
+      <p class="field-note" data-i18n="rule.note2026">两法在 2026 年相差一日：罗姆法为 18 Brumaire，秋分法为 17 Brumaire。</p>
     </div>
 
     <div class="field">
-      <label class="field-label">时钟基准 <span>Référence horaire</span></label>
+      <label class="field-label"><span data-i18n="field.tz">时钟基准</span> <span data-i18n="field.tzFr">Référence horaire</span></label>
       <div class="seg" id="tzSeg">
-        <button type="button" data-v="local" class="on">本地时间</button>
-        <button type="button" data-v="paris">巴黎平太阳时</button>
+        <button type="button" data-v="local" class="on" data-i18n="tz.local">本地时间</button>
+        <button type="button" data-v="paris" data-i18n="tz.paris">巴黎平太阳时</button>
       </div>
       <p class="field-note" id="tzNote">以本机当地零时为共和历 0 时。</p>
     </div>
 
     <div class="field">
-      <label class="field-label">外观 <span>Apparence</span></label>
+      <label class="field-label"><span data-i18n="field.theme">外观</span> <span data-i18n="field.themeFr">Apparence</span></label>
       <div class="seg" id="themeSeg">
-        <button type="button" data-v="auto" class="on">随系统</button>
-        <button type="button" data-v="light">羊皮纸</button>
-        <button type="button" data-v="dark">墨夜</button>
+        <button type="button" data-v="auto" class="on" data-i18n="theme.auto">随系统</button>
+        <button type="button" data-v="light" data-i18n="theme.light">羊皮纸</button>
+        <button type="button" data-v="dark" data-i18n="theme.dark">墨夜</button>
       </div>
     </div>
 
     <div class="field">
-      <label class="field-label">制式 <span>Format</span></label>
-      <div class="seg" id="fmtSeg">
-        <button type="button" data-v="both" class="on">十进时 + 24 时</button>
-        <button type="button" data-v="dec">仅十进时</button>
+      <label class="field-label"><span data-i18n="field.lang">语言</span> <span data-i18n="field.langFr">Langue</span></label>
+      <div class="seg" id="langSeg">
+        <button type="button" data-v="auto" class="on" data-i18n="lang.auto">跟随系统</button>
+        <button type="button" data-v="zh" data-i18n="lang.zh">中法</button>
+        <button type="button" data-v="en" data-i18n="lang.en">英法</button>
+        <button type="button" data-v="fr" data-i18n="lang.fr">法文</button>
       </div>
     </div>
 
     <div class="drawer-foot">
-      <p>纪元：1792 年 9 月 22 日（1 Vendémiaire an I）。<br>月名与日名依 1793 年 10 月 5 日法令；中文名依中文维基百科。</p>
-      <p class="small">数据与算法核验：9 Thermidor an II = 1794-07-27；18 Brumaire an VIII = 1799-11-09；1 Vendémiaire an XIV = 1805-09-23。</p>
+      <p data-i18n="about.era">纪元：1792 年 9 月 22 日（1 Vendémiaire an I）。<br>月名与日名依 1793 年 10 月 5 日法令；中文名依中文维基百科。</p>
+      <p class="small" data-i18n="about.check">数据与算法核验：9 Thermidor an II = 1794-07-27；18 Brumaire an VIII = 1799-11-09；1 Vendémiaire an XIV = 1805-09-23。</p>
     </div>
   </div>
 </aside>
 
 <script src="calendar.js"></script>
+<script src="i18n.js"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>

@@ -2,7 +2,7 @@
 
 Windows 桌面与 Android 上的法国共和历日历时钟。桌面版是单文件 exe，绿色免安装；安卓版是单 APK。
 
-> A clock and calendar for the French Republican calendar, on Windows and Android: decimal time (10 hours a day), a dual-track dial, 30-day months, the day-of-year produce list, and both leap-year rules to compare. UI in vanilla HTML/CSS/JS; the Windows build is a single-file exe, the Android build a single APK.
+> A clock and calendar for the French Republican calendar, on Windows and Android: decimal time (10 hours a day), a dual-track dial, 30-day months, the day-of-year produce list, both leap-year rules to compare, and a three-language UI (Chinese–French, English–French, French only). UI in vanilla HTML/CSS/JS; the Windows build is a single-file exe, the Android build a single APK.
 
 ![界面](docs/preview.png)
 
@@ -18,8 +18,8 @@ Windows 桌面与 Android 上的法国共和历日历时钟。桌面版是单文
 ## 功能
 
 **十进制时钟**
-1 日 = 10 共和时 = 1000 共和分 = 100000 共和秒，1 共和秒 ≈ 0.864 秒。
-数字钟以 `时 : 分 : 秒` 显示，旁边小字显示同一时刻的 24 小时制与本地时间。点一下这个小字块可以把 24 时制收起（变成虚线框的「24 时」），再点一下展开——按钮不会消失。
+1 日 = 10 十进制小时 = 1,000 十进制分钟 = 100,000 十进制秒（1 十进制秒 = 0.864 秒）。
+数字钟以 `时 : 分 : 秒` 显示，旁边小字始终显示同一时刻的 24 小时制时间（不可隐藏）。
 
 **双轨表盘**
 - 外圈：24 小时刻度 + 罗马数字 I–XXIV，每 15° 一大格，每格 4 小格。
@@ -45,7 +45,16 @@ Windows 桌面与 Android 上的法国共和历日历时钟。桌面版是单文
 - 置闰规则：定长规则法（罗姆）/ 巴黎秋分精确法，可切换。
 - 时钟基准：本地时间 / 巴黎平太阳时。
 - 外观：随系统 / 羊皮纸 / 墨夜。
-- 制式：十进时 + 24 时，或仅十进时。
+- 语言：跟随系统 / 中文 / English / Français（语言名固定用其本身语言显示）。
+
+**多语言**
+界面有四种设定，默认跟随设备语言：中文（简体与繁体都算，含 zh-CN、zh-TW、zh-HK、zh-Hant…、cmn、yue）→ **中法**，法语 → **纯法语**，其他语言（含英文）→ **英法**。四个按钮的文字固定为「跟随系统 / 中文 / English / Français」——语言名用自己的语言书写，不随界面语言变化，中文界面下也显示 English 与 Français。
+
+- **中法**：中文为主，法文并列作专名——月头「雾月 BRUMAIRE」、物产「白花丹 · Dentelaire」。
+- **英法**：法文仍是专名，释义换成英文——月头「BRUMAIRE · MIST」、物产「Pomegranate（法文 Grenade）」、格子日名「Leadwort」。
+- **纯法语**：独立排版，全法文——`AN CCXXXV`、`19 Brumaire`、`1ʳᵉ DÉCADE`、`lundi 9 novembre 2026`，不出现中文与英文。
+
+365 天的物产名与一段农事介绍都有中文、英文、法文三份；月名、季节、类别、旬名、星期同样三份。应用名也跟随语言切换：窗口标题与安卓桌面图标名分别为「法国共和历 / French Republican Calendar / Calendrier républicain」。英文与法文文案依据英文、法文维基百科的共和历条目撰写，并逐条校对过专名（如 Dentelaire = Leadwort = 白花丹）。
 
 ## 界面截图
 
@@ -57,23 +66,23 @@ Windows 桌面与 Android 上的法国共和历日历时钟。桌面版是单文
 
 ![日期换算](docs/converter-item.jpg)
 
-**24 时制收起态**（虚线框的「24 时」，再点一下展开）
-
-![24 时 chip](docs/chip-24h.jpg)
-
 ## Android 版
 
 同一套历法内核（`calendar.js` + `data.js`），界面按手机竖屏重排为四页，底部胶囊 tab 切换，也可以左右滑动翻页。
 
-| 钟 | 日历 | 换算 | 设置 |
+| 钟（中法） | 日历（英法） | 换算（中法） | 墨夜 |
 |---|---|---|---|
-| ![钟](docs/android-clock.jpg) | ![日历](docs/android-calendar.jpg) | ![换算](docs/android-convert.jpg) | ![设置](docs/android-dark.jpg) |
+| ![钟](docs/android-clock.jpg) | ![日历](docs/android-calendar.jpg) | ![换算](docs/android-convert.jpg) | ![墨夜](docs/android-dark.jpg) |
+
+纯法语模式：
+
+![法语界面](docs/android-fr.jpg)
 
 - **横滑翻页**：任意页面左右滑动即可切页，阈值约屏宽 18%，边界处有阻尼回弹。
 - **钟**：与桌面同款双轨表盘，向下滚动可看到今日条（月名 / 日号 / 年号 / 公历）。
 - **日历**：日期牌 + 三旬网格（每旬 2 行 × 5 格，中文日名完整显示）+ 物产卡；点年号弹出底部面板，可按共和纪年或公元年月跳转。
 - **换算**：双向即时换算，结果内联物产，底部「在月历中查看这一天」直接跳到对应月份。
-- **设置**：置闰规则、时钟基准、外观（随系统 / 羊皮纸 / 墨夜）、制式。
+- **设置**：置闰规则、时钟基准、外观（随系统 / 羊皮纸 / 墨夜）、语言（跟随系统 / 中文 / English / Français）。
 - 系统返回键：先关弹层，再回到第一页，最后才退出。
 - 全面屏适配：内容延伸到状态栏与导航栏下方，图标明暗随主题切换；竖屏锁定。
 
