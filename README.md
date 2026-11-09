@@ -8,7 +8,7 @@ Windows 桌面与 Android 上的法国共和历日历时钟。桌面版是单文
 
 ## 直接使用
 
-通过[Release](https://github.com/ClukayN/french-republican-calendar-clock/releases)下载运行即可。
+通过[Release](https://github.com/ClukayN/french-republican-calendar-clock/releases)下载运行即可：同一个 Release 里挂了两个附件，`...-<tag>.exe` 是 Windows 桌面版，`...-<tag>.apk` 是 Android 版。
 
 - 首次启动需要系统里装有 **Microsoft Edge WebView2 运行时**（Windows 10/11 一般自带）。
   若缺失，程序会给出提示和下载链接：<https://go.microsoft.com/fwlink/p/?LinkId=2124703>
