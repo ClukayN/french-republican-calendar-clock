@@ -330,7 +330,7 @@
     dom.dediCat.textContent = I.cat(info.cat) || t('chip.cat');
     dom.dediFr.textContent = info.fr || '';
     dom.dediFr.style.display = (I.mode() === 'fr' || !info.fr) ? 'none' : '';
-    dom.dediCn.textContent = I.mode() === 'zh' ? (info.cn || '') : (info.en || info.cn || '');
+    dom.dediCn.textContent = I.dayName(info) || '';
     dom.dediDesc.textContent = I.dayDesc(info) || '';
   }
 

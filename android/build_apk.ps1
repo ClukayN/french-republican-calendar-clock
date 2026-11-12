@@ -14,8 +14,8 @@ param(
   [switch]$Install,
   [switch]$Quiet,
   [string]$SdkRoot = '',
-  [string]$VersionName = '1.2.0',
-  [int]$VersionCode = 8
+  [string]$VersionName = '1.2.1',
+  [int]$VersionCode = 9
 )
 
 $ErrorActionPreference = 'Stop'

@@ -279,7 +279,7 @@
       setText(dom.dediMode, r.month >= 13 ? t('chip.festival') : t('chip.today'));
       setText(dom.dediFr, info.fr || '');
       dom.dediFr.style.display = (I.mode() === 'fr' || !info.fr) ? 'none' : '';
-      setText(dom.dediCn, I.mode() === 'zh' ? (info.cn || '') : (info.en || info.cn || ''));
+      setText(dom.dediCn, I.dayName(info) || '');
       setText(dom.dediDesc, I.dayDesc(info) || '');
     }
   }
